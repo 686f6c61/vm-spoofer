@@ -1,0 +1,216 @@
+============================================
+ VM Spoofer - Instrucciones para macOS
+============================================
+
+Qué es VM Spoofer?
+------------------
+Camufla máquinas virtuales de VirtualBox para que no sean
+detectadas por herramientas como systeminformation.
+Cambia fabricante, BIOS, placa base, disco, GPU, MAC y más.
+
+El script detecta automáticamente si tu Mac es Intel o
+Apple Silicon y muestra esa información durante el proceso.
+
+
+REQUISITOS
+----------
+  - macOS 15 (Sequoia) o superior
+  - VirtualBox: el programa de máquinas virtuales donde
+    tienes la VM que quieres camuflar.
+    Descargar desde https://www.virtualbox.org
+  - Homebrew: es el gestor de paquetes de macOS. Permite
+    instalar programas desde el terminal, similar a apt
+    en Linux. Si nunca lo has usado, es seguro y lo usan
+    millones de desarrolladores.
+    Instalar desde https://brew.sh
+  - Una VM ya creada en VirtualBox (Windows o Linux)
+  - Los archivos: vm-spoofer-mac.sh, hardware-db.json
+
+  Instalar dependencias con Homebrew:
+    brew install dialog jq
+
+  Qué es cada dependencia:
+    - dialog: programa que muestra menús gráficos dentro
+      del terminal (las pantallas con opciones que verás
+      al ejecutar el script). Sin él no se pueden mostrar
+      los menús interactivos.
+    - jq: herramienta para leer archivos JSON desde el
+      terminal. El script lo necesita para leer la base
+      de datos de hardware (hardware-db.json) y extraer
+      los perfiles de fabricante, CPU, disco, etc.
+
+  Si no tienes Homebrew:
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+
+CÓMO USAR
+---------
+
+1. Abrir Terminal
+   Aplicaciones > Utilidades > Terminal
+   O buscar "Terminal" en Spotlight (Cmd + Espacio)
+
+2. Ir a la carpeta del script
+   cd ruta/a/vm-creator
+
+3. Dar permisos de ejecución (solo la primera vez)
+   chmod +x vm-spoofer-mac.sh
+
+4. Ejecutar
+   ./vm-spoofer-mac.sh
+
+   O si prefieres sin dar permisos:
+   bash vm-spoofer-mac.sh
+
+4. Seguir el asistente (8 pasos)
+
+   El script detecta si tu Mac es Intel o Apple Silicon
+   y lo muestra en cada pantalla.
+
+   [1/8] Seleccionar VM
+         Detecta automáticamente tus VMs de VirtualBox.
+         Si la VM está encendida, guardada o bloqueada,
+         el script la prepara automáticamente.
+
+   [2/8] Fabricante
+         Elige qué equipo quieres simular:
+         Lenovo, Dell, HP, ASUS, Apple, MSI, Acer,
+         Microsoft Surface, Samsung, Huawei, Razer,
+         Framework, o PC sobremesa genérico.
+
+   [3/8] Procesador
+         Intel i3 a i9, Intel Ultra, AMD Ryzen 5-9,
+         Apple M1 a M4 Pro.
+
+   [4/8] RAM y CPUs
+         Puedes asignar MÁS RAM de la que tiene la VM.
+         El SO invitado verá la cantidad que elijas.
+
+   [5/8] Disco, GPU y Red
+         a) Disco: Samsung, WD, Kingston, Crucial, Seagate,
+            SK Hynix, Intel, Toshiba, Apple SSD...
+         b) GPU: Intel (UHD, Iris, Arc), AMD (Radeon, RX),
+            NVIDIA (RTX 3000-5000, GTX), Apple M1-M4
+         c) Red: Generador de MAC con 3 opciones:
+            - Auto: genera aleatoria con prefijo del fabricante
+            - Manual: escribes la MAC que quieras
+            - Random: regenera otra con el mismo prefijo
+
+   [6/8] Chipset PCI
+         Cambia TODOS los dispositivos PCI de la VM:
+         Intel 12th-14th Gen, Meteor Lake, Arrow Lake,
+         AMD Zen4/Zen5, Apple Intel, Apple Silicon.
+
+   [7/8] Dispositivos USB
+         Detecta cámaras, micrófonos y altavoces del Mac.
+         Los que selecciones se conectan cada vez que
+         arranca la VM.
+
+   [8/8] Confirmar y aplicar
+         Muestra resumen completo. Confirmar para aplicar.
+
+5. Arrancar la VM
+   El script pregunta si quieres arrancarla.
+
+6. Verificar el camuflaje (dentro de la VM)
+
+   La verificación se hace con la librería systeminformation
+   de Node.js. Es la referencia que usan la mayoría de apps
+   para detectar máquinas virtuales.
+
+   Repositorio: https://github.com/sebhildebrandt/systeminformation
+   Librería open source de Node.js para consultar hardware.
+
+   OPCIÓN A: Verificar con Node.js (recomendado)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   a) Instalar Node.js en la VM (si no lo tienes):
+
+      Si la VM es Windows:
+        Descargar desde https://nodejs.org
+
+      Si la VM es Linux:
+        sudo apt install -y nodejs npm
+
+      Si la VM es macOS:
+        brew install node
+
+   b) Copiar check.js dentro de la VM y ejecutar:
+      npm install systeminformation
+      node check.js
+
+   c) Resultado esperado:
+      - system.virtual:      false
+      - system.virtualHost:  vacío
+      - Fabricante:           (el que elegiste)
+
+   OPCIÓN B: Sin Node.js
+   ~~~~~~~~~~~~~~~~~~~~~~
+
+   Dentro de una VM Windows (PowerShell):
+     Get-CimInstance Win32_ComputerSystem | Format-List Manufacturer, Model
+
+   Dentro de una VM Linux:
+     sudo dmidecode -s system-manufacturer
+
+
+NOTAS SOBRE APPLE SILICON
+-------------------------
+VirtualBox en Apple Silicon (M1/M2/M3/M4) funciona pero
+con algunas limitaciones:
+
+  - Solo puede ejecutar VMs de arquitectura ARM
+  - Windows 11 ARM funciona correctamente
+  - Linux ARM (Ubuntu, Fedora) funciona correctamente
+  - No se pueden ejecutar VMs x86 (Windows x64 clásico)
+
+En Macs Intel no hay ninguna limitación.
+
+
+CÁMARA EN MAC
+-------------
+La cámara FaceTime de los Mac es un dispositivo interno,
+no USB. VirtualBox no puede redirigirla a la VM.
+
+Software como OBS Virtual Camera puede ser detectado por
+herramientas de análisis, lo que comprometería el camuflaje.
+
+Si necesitas usar cámara en la VM desde un Mac, conecta
+una webcam USB externa (Logitech, Insta360, Razer, etc.).
+El script la detectará y configurará automáticamente igual
+que en Windows y Linux.
+
+El micrófono y los altavoces integrados sí funcionan:
+el script los activa automáticamente con audio-in/audio-out
+de VirtualBox.
+
+
+PREGUNTAS FRECUENTES
+--------------------
+P: La VM tiene que estar apagada?
+R: No. El script la apaga solo si hace falta.
+
+P: Pierdo datos si aplico el camuflaje?
+R: No. Solo cambia metadatos, no afecta a los archivos.
+
+P: Puedo revertir los cambios?
+R: Sí. El script guarda un backup automático antes de
+   aplicar cambios. Ejecuta el script de nuevo y elige
+   "Restaurar una VM" para volver a la configuración
+   original. Los backups se guardan en la carpeta backups/.
+
+P: Funciona en Mac Intel y Apple Silicon?
+R: Sí. El script detecta automáticamente la arquitectura
+   y adapta los comandos. En la interfaz verás si es
+   "Intel" o "Apple Silicon" en cada pantalla.
+
+P: Funciona con VMware Fusion?
+R: No. Solo VirtualBox.
+
+P: Qué diferencia hay entre este script y el de Linux?
+R: La interfaz usa 'dialog' en vez de 'whiptail',
+   los comandos del sistema son diferentes (sysctl en vez
+   de /proc), y detecta la arquitectura del Mac.
+   Los comandos de VirtualBox son idénticos.
+
+============================================
