@@ -1,0 +1,5 @@
+backups/
+*.backup.json
+node_modules/
+post-install-linux.sh
+post-install-windows.txt

@@ -1,0 +1,180 @@
+============================================
+ VM Spoofer - Instrucciones para Windows
+============================================
+
+Qué es VM Spoofer?
+------------------
+Camufla máquinas virtuales de VirtualBox para que no sean
+detectadas por herramientas como systeminformation.
+Cambia fabricante, BIOS, placa base, disco, GPU, MAC y más.
+
+
+REQUISITOS
+----------
+  - VirtualBox: el programa de máquinas virtuales donde
+    tienes la VM que quieres camuflar.
+    Descargar desde https://www.virtualbox.org
+  - PowerShell: el terminal de Windows. Viene incluido en
+    Windows 10 y 11, no hay que instalar nada.
+  - Una VM ya creada en VirtualBox (Windows o Linux)
+  - Los archivos: vm-spoofer.ps1, hardware-db.json, check.js
+
+  No se necesitan dependencias adicionales en Windows.
+  El script usa PowerShell (incluido en el sistema) y
+  VBoxManage (incluido con VirtualBox).
+
+
+CÓMO USAR
+---------
+
+1. Abrir PowerShell
+   Clic derecho en Inicio > Terminal (o PowerShell)
+   O pulsar Win+R > escribir "powershell" > Enter
+
+2. Ir a la carpeta del script
+   cd ruta\a\vm-creator
+
+3. Ejecutar
+   powershell -ExecutionPolicy Bypass -File vm-spoofer.ps1
+
+4. Seguir el asistente (8 pasos)
+
+   [1/8] Seleccionar VM
+         Detecta automáticamente tus VMs de VirtualBox.
+         Si la VM está encendida, guardada o bloqueada,
+         el script la prepara automáticamente.
+
+   [2/8] Fabricante
+         Elige qué equipo quieres simular:
+         Lenovo, Dell, HP, ASUS, Apple, MSI, Acer,
+         Microsoft Surface, Samsung, Huawei, Razer,
+         Framework, o PC sobremesa genérico.
+
+   [3/8] Procesador
+         Intel i3 a i9, Intel Ultra, AMD Ryzen 5-9,
+         Apple M1 a M4 Pro.
+
+   [4/8] RAM y CPUs
+         Puedes asignar MÁS RAM de la que tiene la VM.
+         El SO invitado verá la cantidad que elijas.
+
+   [5/8] Disco, GPU y Red
+         a) Disco: Samsung, WD, Kingston, Crucial, Seagate,
+            SK Hynix, Intel, Toshiba, Apple...
+         b) GPU: Intel (UHD, Iris, Arc), AMD (Radeon, RX),
+            NVIDIA (RTX 3000-5000, GTX), Apple M1-M4
+         c) Red: MAC del fabricante que elijas.
+            Genera una MAC automáticamente. Puedes elegir
+            auto, manual o regenerar.
+
+   [6/8] Chipset PCI
+         Plantilla que cambia todos los dispositivos PCI:
+         Intel 12th-14th Gen, Meteor Lake, Arrow Lake,
+         AMD Zen4/Zen5, Apple Intel, Apple Silicon.
+
+   [7/8] Dispositivos USB
+         Detecta cámaras, micrófonos y altavoces conectados.
+         Los que selecciones se conectarán automáticamente
+         cada vez que arranques la VM.
+
+   [8/8] Confirmar y aplicar
+         Muestra un resumen. Escribe 's' para aplicar.
+
+5. Arrancar la VM
+   El script pregunta si quieres arrancarla.
+
+6. Verificar el camuflaje (dentro de la VM)
+
+   La verificación se hace con la librería systeminformation
+   de Node.js. Es la referencia que usan la mayoría de apps
+   para detectar máquinas virtuales.
+
+   Repositorio: https://github.com/sebhildebrandt/systeminformation
+   Librería open source de Node.js para consultar hardware.
+
+   OPCIÓN A: Verificar con Node.js (recomendado)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   a) Instalar Node.js en la VM (si no lo tienes):
+      - Descargar desde https://nodejs.org
+      - Ejecutar el instalador con las opciones por defecto
+      - Reiniciar la terminal después de instalar
+
+   b) Crear una carpeta y copiar check.js dentro:
+      mkdir C:\vm-verify
+      cd C:\vm-verify
+      (copiar check.js a esta carpeta)
+
+   c) Instalar la librería:
+      npm install systeminformation
+
+   d) Ejecutar la verificación:
+      node check.js
+
+   e) Resultado esperado:
+      - system.virtual:      false  (NO detectada como VM)
+      - system.virtualHost:  vacío  (sin rastro de hipervisor)
+      - system.virtualVendor: vacío (sin VirtualBox/VMware)
+      - Fabricante:           (el que elegiste, ej: Dell Inc.)
+      - Disco:                (el que elegiste, ej: Samsung 990 PRO)
+
+   Si system.virtual sale "true", algo falló. Revisa que
+   aplicaste el camuflaje con la VM apagada.
+
+
+   OPCIÓN B: Verificar con PowerShell (rápido, sin instalar nada)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Abrir PowerShell dentro de la VM y ejecutar:
+
+   Get-CimInstance Win32_ComputerSystem | Format-List Manufacturer, Model
+   Get-CimInstance Win32_BIOS | Format-List Manufacturer, SMBIOSBIOSVersion
+   Get-CimInstance Win32_DiskDrive | Format-List Model, SerialNumber
+   Get-CimInstance Win32_BaseBoard | Format-List Manufacturer, Product
+
+   Debe mostrar el fabricante, BIOS y disco que elegiste,
+   NO "VirtualBox", "Oracle" ni "VBOX HARDDISK".
+
+
+   OPCIÓN C: Verificar con systeminfo (sin instalar nada)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Abrir CMD dentro de la VM y ejecutar:
+
+   systeminfo | findstr /i "fabricante modelo"
+
+   Debe mostrar el fabricante que elegiste.
+
+
+   QUÉ INDICADORES SE COMPRUEBAN
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Indicador              Fuente                    Fiabilidad
+   ---------------------------------------------------------------
+   system.virtual         BIOS/DMI                  Alta
+   system.virtualVendor   BIOS/DMI                  Alta
+   system.virtualHost     BIOS/DMI                  Alta
+   diskLayout.name        Disco                     Media
+   diskLayout.vendor      Disco                     Media
+   graphics.vendor        GPU (lspci en Linux)      Media
+   networkInterfaces.mac  Prefijo MAC               Media
+   Combinación de todo    Múltiples fuentes         Muy Alta
+
+
+PREGUNTAS FRECUENTES
+--------------------
+P: La VM tiene que estar apagada?
+R: No. El script la apaga solo si hace falta.
+
+P: Pierdo datos si aplico el camuflaje?
+R: No. Solo cambia metadatos, no afecta a los archivos.
+
+P: Puedo revertir los cambios?
+R: Sí. El script guarda un backup automático antes de
+   aplicar cambios. Ejecuta el script de nuevo y elige
+   "Restaurar una VM" para volver a la configuración
+   original. Los backups se guardan en la carpeta backups/.
+
+P: Funciona con VMware?
+R: No. Solo VirtualBox.
+
+============================================

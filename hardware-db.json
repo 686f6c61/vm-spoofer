@@ -1,0 +1,594 @@
+{
+  "manufacturers": {
+    "lenovo_thinkpad_x1": {
+      "label": "Lenovo ThinkPad X1 Carbon Gen 10",
+      "system": { "vendor": "LENOVO", "product": "20Y7CTO1WW", "version": "ThinkPad X1 Carbon Gen 10", "sku": "LENOVO_MT_20Y7_BU_Think_FM_ThinkPad X1 Carbon Gen 10", "family": "ThinkPad X1 Carbon Gen 10" },
+      "bios": { "vendor": "LENOVO", "version": "N3HET91W (1.56 )", "date": "03/15/2024", "major": "1", "minor": "56", "firmware_major": "1", "firmware_minor": "36" },
+      "board": { "vendor": "LENOVO", "product": "21CBCTO1WW", "version": "SDK0T76530 WIN" },
+      "chassis": { "vendor": "LENOVO", "version": "None", "type": "10" },
+      "acpi": { "oem_id": "LENOVO", "creator_id": "LNVO", "creator_rev": "20240315" }
+    },
+    "lenovo_thinkpad_t14": {
+      "label": "Lenovo ThinkPad T14 Gen 4",
+      "system": { "vendor": "LENOVO", "product": "21HD0009US", "version": "ThinkPad T14 Gen 4", "sku": "LENOVO_MT_21HD_BU_Think_FM_ThinkPad T14 Gen 4", "family": "ThinkPad T14 Gen 4" },
+      "bios": { "vendor": "LENOVO", "version": "R22ET70W (1.40 )", "date": "01/22/2024", "major": "1", "minor": "40", "firmware_major": "1", "firmware_minor": "30" },
+      "board": { "vendor": "LENOVO", "product": "21HD0009US", "version": "SDK0T76461 WIN" },
+      "chassis": { "vendor": "LENOVO", "version": "None", "type": "10" },
+      "acpi": { "oem_id": "LENOVO", "creator_id": "LNVO", "creator_rev": "20240122" }
+    },
+    "lenovo_thinkpad_x1_nano": {
+      "label": "Lenovo ThinkPad X1 Nano Gen 3",
+      "system": { "vendor": "LENOVO", "product": "21K2CTO1WW", "version": "ThinkPad X1 Nano Gen 3", "sku": "LENOVO_MT_21K2_BU_Think_FM_ThinkPad X1 Nano Gen 3", "family": "ThinkPad X1 Nano Gen 3" },
+      "bios": { "vendor": "LENOVO", "version": "N3XET36W (1.22 )", "date": "05/10/2024", "major": "1", "minor": "22", "firmware_major": "1", "firmware_minor": "18" },
+      "board": { "vendor": "LENOVO", "product": "21K2CTO1WW", "version": "SDK0T76538 WIN" },
+      "chassis": { "vendor": "LENOVO", "version": "None", "type": "10" },
+      "acpi": { "oem_id": "LENOVO", "creator_id": "LNVO", "creator_rev": "20240510" }
+    },
+    "lenovo_ideapad_5": {
+      "label": "Lenovo IdeaPad 5 Pro 16",
+      "system": { "vendor": "LENOVO", "product": "82L5CTO1WW", "version": "IdeaPad 5 Pro 16ACH6", "sku": "LENOVO_MT_82L5_BU_idea_FM_IdeaPad 5 Pro 16ACH6", "family": "IdeaPad 5 Pro 16ACH6" },
+      "bios": { "vendor": "LENOVO", "version": "GKCN62WW", "date": "11/14/2023", "major": "1", "minor": "62", "firmware_major": "1", "firmware_minor": "28" },
+      "board": { "vendor": "LENOVO", "product": "LNVNB161216", "version": "SDK0T76463 WIN" },
+      "chassis": { "vendor": "LENOVO", "version": "IdeaPad 5 Pro 16ACH6", "type": "10" },
+      "acpi": { "oem_id": "LENOVO", "creator_id": "LNVO", "creator_rev": "20231114" }
+    },
+    "lenovo_yoga_9i": {
+      "label": "Lenovo Yoga 9i Gen 8 14",
+      "system": { "vendor": "LENOVO", "product": "83B1CTO1WW", "version": "Yoga 9 14IAP7", "sku": "LENOVO_MT_83B1_BU_idea_FM_Yoga 9 14IAP7", "family": "Yoga 9 14IAP7" },
+      "bios": { "vendor": "LENOVO", "version": "J1CN48WW", "date": "08/22/2024", "major": "1", "minor": "48", "firmware_major": "1", "firmware_minor": "22" },
+      "board": { "vendor": "LENOVO", "product": "LNVNB161216", "version": "SDK0T76538 WIN" },
+      "chassis": { "vendor": "LENOVO", "version": "Yoga 9 14IAP7", "type": "31" },
+      "acpi": { "oem_id": "LENOVO", "creator_id": "LNVO", "creator_rev": "20240822" }
+    },
+    "dell_xps_15": {
+      "label": "Dell XPS 15 9530",
+      "system": { "vendor": "Dell Inc.", "product": "XPS 15 9530", "version": "", "sku": "0B12", "family": "XPS" },
+      "bios": { "vendor": "Dell Inc.", "version": "1.23.0", "date": "02/08/2024", "major": "1", "minor": "23", "firmware_major": "1", "firmware_minor": "12" },
+      "board": { "vendor": "Dell Inc.", "product": "06JWJK", "version": "A01" },
+      "chassis": { "vendor": "Dell Inc.", "version": "", "type": "10" },
+      "acpi": { "oem_id": "DELL  ", "creator_id": "DELL", "creator_rev": "20240208" }
+    },
+    "dell_xps_13": {
+      "label": "Dell XPS 13 9340",
+      "system": { "vendor": "Dell Inc.", "product": "XPS 13 9340", "version": "", "sku": "0C8F", "family": "XPS" },
+      "bios": { "vendor": "Dell Inc.", "version": "1.8.0", "date": "06/15/2024", "major": "1", "minor": "8", "firmware_major": "1", "firmware_minor": "5" },
+      "board": { "vendor": "Dell Inc.", "product": "0FXRPC", "version": "A00" },
+      "chassis": { "vendor": "Dell Inc.", "version": "", "type": "10" },
+      "acpi": { "oem_id": "DELL  ", "creator_id": "DELL", "creator_rev": "20240615" }
+    },
+    "dell_latitude_5540": {
+      "label": "Dell Latitude 5540",
+      "system": { "vendor": "Dell Inc.", "product": "Latitude 5540", "version": "", "sku": "0C29", "family": "Latitude" },
+      "bios": { "vendor": "Dell Inc.", "version": "1.18.0", "date": "12/05/2023", "major": "1", "minor": "18", "firmware_major": "1", "firmware_minor": "9" },
+      "board": { "vendor": "Dell Inc.", "product": "0FRJ3M", "version": "A00" },
+      "chassis": { "vendor": "Dell Inc.", "version": "", "type": "10" },
+      "acpi": { "oem_id": "DELL  ", "creator_id": "DELL", "creator_rev": "20231205" }
+    },
+    "dell_inspiron_16": {
+      "label": "Dell Inspiron 16 5630",
+      "system": { "vendor": "Dell Inc.", "product": "Inspiron 16 5630", "version": "", "sku": "0BFE", "family": "Inspiron" },
+      "bios": { "vendor": "Dell Inc.", "version": "1.15.0", "date": "09/20/2023", "major": "1", "minor": "15", "firmware_major": "1", "firmware_minor": "8" },
+      "board": { "vendor": "Dell Inc.", "product": "0X4NRH", "version": "A00" },
+      "chassis": { "vendor": "Dell Inc.", "version": "", "type": "10" },
+      "acpi": { "oem_id": "DELL  ", "creator_id": "DELL", "creator_rev": "20230920" }
+    },
+    "dell_precision_5680": {
+      "label": "Dell Precision 5680 (Workstation)",
+      "system": { "vendor": "Dell Inc.", "product": "Precision 5680", "version": "", "sku": "0BCD", "family": "Precision" },
+      "bios": { "vendor": "Dell Inc.", "version": "1.14.0", "date": "03/12/2024", "major": "1", "minor": "14", "firmware_major": "1", "firmware_minor": "8" },
+      "board": { "vendor": "Dell Inc.", "product": "0WMJT8", "version": "A00" },
+      "chassis": { "vendor": "Dell Inc.", "version": "", "type": "10" },
+      "acpi": { "oem_id": "DELL  ", "creator_id": "DELL", "creator_rev": "20240312" }
+    },
+    "hp_elitebook_840": {
+      "label": "HP EliteBook 840 G10",
+      "system": { "vendor": "HP", "product": "HP EliteBook 840 G10", "version": "", "sku": "816C", "family": "103C_5336AN HP EliteBook" },
+      "bios": { "vendor": "HP", "version": "U78 Ver. 01.05.00", "date": "01/30/2024", "major": "1", "minor": "5", "firmware_major": "25", "firmware_minor": "0" },
+      "board": { "vendor": "HP", "product": "895D", "version": "KBC Version 02.08.00" },
+      "chassis": { "vendor": "HP", "version": "", "type": "10" },
+      "acpi": { "oem_id": "HP    ", "creator_id": "HP  ", "creator_rev": "20240130" }
+    },
+    "hp_spectre_x360": {
+      "label": "HP Spectre x360 16-f2",
+      "system": { "vendor": "HP", "product": "HP Spectre x360 2-in-1 Laptop 16-f2xxx", "version": "", "sku": "8BBB", "family": "103C_5335KV HP Spectre" },
+      "bios": { "vendor": "HP", "version": "U88 Ver. 01.03.00", "date": "04/18/2024", "major": "1", "minor": "3", "firmware_major": "26", "firmware_minor": "0" },
+      "board": { "vendor": "HP", "product": "8BBB", "version": "KBC Version 02.04.00" },
+      "chassis": { "vendor": "HP", "version": "", "type": "31" },
+      "acpi": { "oem_id": "HP    ", "creator_id": "HP  ", "creator_rev": "20240418" }
+    },
+    "hp_pavilion_15": {
+      "label": "HP Pavilion Laptop 15-eh2xxx",
+      "system": { "vendor": "HP", "product": "HP Pavilion Laptop 15-eh2xxx", "version": "", "sku": "8A3F", "family": "103C_5335KV HP Pavilion" },
+      "bios": { "vendor": "HP", "version": "F.24", "date": "10/12/2023", "major": "15", "minor": "24", "firmware_major": "21", "firmware_minor": "0" },
+      "board": { "vendor": "HP", "product": "8A3F", "version": "KBC Version 01.06.00" },
+      "chassis": { "vendor": "HP", "version": "", "type": "10" },
+      "acpi": { "oem_id": "HP    ", "creator_id": "HP  ", "creator_rev": "20231012" }
+    },
+    "hp_probook_450": {
+      "label": "HP ProBook 450 G10",
+      "system": { "vendor": "HP", "product": "HP ProBook 450 G10", "version": "", "sku": "816E", "family": "103C_5336AN HP ProBook" },
+      "bios": { "vendor": "HP", "version": "U80 Ver. 01.03.00", "date": "11/15/2023", "major": "1", "minor": "3", "firmware_major": "23", "firmware_minor": "0" },
+      "board": { "vendor": "HP", "product": "895E", "version": "KBC Version 02.06.00" },
+      "chassis": { "vendor": "HP", "version": "", "type": "10" },
+      "acpi": { "oem_id": "HP    ", "creator_id": "HP  ", "creator_rev": "20231115" }
+    },
+    "hp_omen_16": {
+      "label": "HP OMEN 16-wd0xxx (Gaming)",
+      "system": { "vendor": "HP", "product": "OMEN by HP Laptop 16-wd0xxx", "version": "", "sku": "8FC5", "family": "103C_5335KV HP OMEN" },
+      "bios": { "vendor": "HP", "version": "F.05", "date": "07/20/2024", "major": "15", "minor": "5", "firmware_major": "24", "firmware_minor": "0" },
+      "board": { "vendor": "HP", "product": "8FC5", "version": "KBC Version 01.02.00" },
+      "chassis": { "vendor": "HP", "version": "", "type": "10" },
+      "acpi": { "oem_id": "HP    ", "creator_id": "HP  ", "creator_rev": "20240720" }
+    },
+    "asus_zenbook_14": {
+      "label": "ASUS ZenBook 14 UX3402",
+      "system": { "vendor": "ASUSTeK COMPUTER INC.", "product": "ZenBook UX3402ZA_UX3402ZA", "version": "1.0", "sku": "", "family": "ZenBook" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "UX3402ZA.312", "date": "12/18/2023", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "ASUSTeK COMPUTER INC.", "product": "UX3402ZA", "version": "1.0" },
+      "chassis": { "vendor": "ASUSTeK COMPUTER INC.", "version": "1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20231218" }
+    },
+    "asus_vivobook_15": {
+      "label": "ASUS VivoBook 15 X1502ZA",
+      "system": { "vendor": "ASUSTeK COMPUTER INC.", "product": "VivoBook_ASUSLaptop X1502ZA_X1502ZA", "version": "1.0", "sku": "", "family": "VivoBook" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "X1502ZA.308", "date": "08/25/2023", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "ASUSTeK COMPUTER INC.", "product": "X1502ZA", "version": "1.0" },
+      "chassis": { "vendor": "ASUSTeK COMPUTER INC.", "version": "1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20230825" }
+    },
+    "asus_rog_strix_g16": {
+      "label": "ASUS ROG Strix G16 G614JV (Gaming)",
+      "system": { "vendor": "ASUSTeK COMPUTER INC.", "product": "ROG Strix G16 G614JV_G614JV", "version": "1.0", "sku": "", "family": "ROG Strix G16" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "G614JV.318", "date": "02/05/2024", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "ASUSTeK COMPUTER INC.", "product": "G614JV", "version": "1.0" },
+      "chassis": { "vendor": "ASUSTeK COMPUTER INC.", "version": "1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20240205" }
+    },
+    "asus_rog_zephyrus_g14": {
+      "label": "ASUS ROG Zephyrus G14 GA403 (Gaming)",
+      "system": { "vendor": "ASUSTeK COMPUTER INC.", "product": "ROG Zephyrus G14 GA403UV_GA403UV", "version": "1.0", "sku": "", "family": "ROG Zephyrus G14" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "GA403UV.304", "date": "05/20/2024", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "ASUSTeK COMPUTER INC.", "product": "GA403UV", "version": "1.0" },
+      "chassis": { "vendor": "ASUSTeK COMPUTER INC.", "version": "1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20240520" }
+    },
+    "asus_tuf_gaming_f15": {
+      "label": "ASUS TUF Gaming F15 FX507 (Gaming)",
+      "system": { "vendor": "ASUSTeK COMPUTER INC.", "product": "TUF Gaming FX507ZC4_FX507ZC4", "version": "1.0", "sku": "", "family": "TUF Gaming" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "FX507ZC4.314", "date": "09/10/2023", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "ASUSTeK COMPUTER INC.", "product": "FX507ZC4", "version": "1.0" },
+      "chassis": { "vendor": "ASUSTeK COMPUTER INC.", "version": "1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20230910" }
+    },
+    "apple_macbookpro_16_2019": {
+      "label": "Apple MacBook Pro 16 (Intel 2019)",
+      "system": { "vendor": "Apple Inc.", "product": "MacBookPro16,1", "version": "1.0", "sku": "", "family": "MacBook Pro" },
+      "bios": { "vendor": "Apple Inc.", "version": "2022.100.22.0.0 (iBridge: 21.16.4222.0.0,0)", "date": "12/18/2023", "major": "2022", "minor": "100", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-E1008331FDC96864", "version": "MacBookPro16,1" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-E1008331FDC96864", "type": "10" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20231218" }
+    },
+    "apple_macbookpro_14_2021": {
+      "label": "Apple MacBook Pro 14 (M1 Pro 2021)",
+      "system": { "vendor": "Apple Inc.", "product": "MacBookPro18,3", "version": "1.0", "sku": "", "family": "MacBook Pro" },
+      "bios": { "vendor": "Apple Inc.", "version": "10151.140.19 (iBridge: 22.16.10511.0.1,0)", "date": "06/10/2024", "major": "10151", "minor": "140", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-937A206F2EE05D01", "version": "MacBookPro18,3" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-937A206F2EE05D01", "type": "10" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20240610" }
+    },
+    "apple_macbookpro_16_2023": {
+      "label": "Apple MacBook Pro 16 (M3 Pro 2023)",
+      "system": { "vendor": "Apple Inc.", "product": "MacBookPro18,1", "version": "1.0", "sku": "", "family": "MacBook Pro" },
+      "bios": { "vendor": "Apple Inc.", "version": "11881.1.1 (iBridge: 23.16.12044.0.0,0)", "date": "10/30/2024", "major": "11881", "minor": "1", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-7BA5B2D9E42DDD94", "version": "MacBookPro18,1" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-7BA5B2D9E42DDD94", "type": "10" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20241030" }
+    },
+    "apple_macbookair_15_2024": {
+      "label": "Apple MacBook Air 15 (M3 2024)",
+      "system": { "vendor": "Apple Inc.", "product": "Mac15,12", "version": "1.0", "sku": "", "family": "MacBook Air" },
+      "bios": { "vendor": "Apple Inc.", "version": "11881.41.4", "date": "03/08/2024", "major": "11881", "minor": "41", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-CEFE3A8C6B439352", "version": "Mac15,12" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-CEFE3A8C6B439352", "type": "10" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20240308" }
+    },
+    "apple_macbookair_13_m2": {
+      "label": "Apple MacBook Air 13 (M2 2022)",
+      "system": { "vendor": "Apple Inc.", "product": "Mac14,2", "version": "1.0", "sku": "", "family": "MacBook Air" },
+      "bios": { "vendor": "Apple Inc.", "version": "10151.101.3", "date": "09/22/2023", "major": "10151", "minor": "101", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-3E8AC5B2A4F76AA1", "version": "Mac14,2" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-3E8AC5B2A4F76AA1", "type": "10" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20230922" }
+    },
+    "apple_imac_24_m3": {
+      "label": "Apple iMac 24 (M3 2023)",
+      "system": { "vendor": "Apple Inc.", "product": "Mac15,4", "version": "1.0", "sku": "", "family": "iMac" },
+      "bios": { "vendor": "Apple Inc.", "version": "11881.1.1", "date": "11/07/2023", "major": "11881", "minor": "1", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-65CE76090165799A", "version": "Mac15,4" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-65CE76090165799A", "type": "13" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20231107" }
+    },
+    "apple_mac_mini_m2": {
+      "label": "Apple Mac Mini (M2 2023)",
+      "system": { "vendor": "Apple Inc.", "product": "Mac14,3", "version": "1.0", "sku": "", "family": "Mac mini" },
+      "bios": { "vendor": "Apple Inc.", "version": "10151.101.3", "date": "01/18/2024", "major": "10151", "minor": "101", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-A3ADEE4AAE38E96C", "version": "Mac14,3" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-A3ADEE4AAE38E96C", "type": "35" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20240118" }
+    },
+    "apple_mac_studio_m2_ultra": {
+      "label": "Apple Mac Studio (M2 Ultra 2023)",
+      "system": { "vendor": "Apple Inc.", "product": "Mac14,14", "version": "1.0", "sku": "", "family": "Mac Studio" },
+      "bios": { "vendor": "Apple Inc.", "version": "10151.101.3", "date": "06/05/2023", "major": "10151", "minor": "101", "firmware_major": "1", "firmware_minor": "0" },
+      "board": { "vendor": "Apple Inc.", "product": "Mac-F252DCC35-", "version": "Mac14,14" },
+      "chassis": { "vendor": "Apple Inc.", "version": "Mac-F252DCC35-", "type": "35" },
+      "acpi": { "oem_id": "APPLE ", "creator_id": "AAPL", "creator_rev": "20230605" }
+    },
+    "acer_aspire_5": {
+      "label": "Acer Aspire 5 A515-57",
+      "system": { "vendor": "Acer", "product": "Aspire A515-57", "version": "V1.14", "sku": "", "family": "Aspire A515-57" },
+      "bios": { "vendor": "Insyde Corp.", "version": "V1.14", "date": "11/09/2023", "major": "1", "minor": "14", "firmware_major": "1", "firmware_minor": "14" },
+      "board": { "vendor": "Acer", "product": "Calla_CAS", "version": "V1.14" },
+      "chassis": { "vendor": "Acer", "version": "Aspire A515-57", "type": "10" },
+      "acpi": { "oem_id": "ACRSYS", "creator_id": "ACER", "creator_rev": "20231109" }
+    },
+    "acer_nitro_5": {
+      "label": "Acer Nitro 5 AN515-58 (Gaming)",
+      "system": { "vendor": "Acer", "product": "Nitro AN515-58", "version": "V1.10", "sku": "", "family": "Nitro AN515-58" },
+      "bios": { "vendor": "Insyde Corp.", "version": "V1.10", "date": "03/15/2024", "major": "1", "minor": "10", "firmware_major": "1", "firmware_minor": "10" },
+      "board": { "vendor": "Acer", "product": "Napoli_ALS", "version": "V1.10" },
+      "chassis": { "vendor": "Acer", "version": "Nitro AN515-58", "type": "10" },
+      "acpi": { "oem_id": "ACRSYS", "creator_id": "ACER", "creator_rev": "20240315" }
+    },
+    "acer_swift_go_14": {
+      "label": "Acer Swift Go 14 SFG14-72",
+      "system": { "vendor": "Acer", "product": "Swift SFG14-72", "version": "V1.04", "sku": "", "family": "Swift SFG14-72" },
+      "bios": { "vendor": "Insyde Corp.", "version": "V1.04", "date": "05/28/2024", "major": "1", "minor": "4", "firmware_major": "1", "firmware_minor": "4" },
+      "board": { "vendor": "Acer", "product": "Cypress_MLS", "version": "V1.04" },
+      "chassis": { "vendor": "Acer", "version": "Swift SFG14-72", "type": "10" },
+      "acpi": { "oem_id": "ACRSYS", "creator_id": "ACER", "creator_rev": "20240528" }
+    },
+    "microsoft_surface_pro9": {
+      "label": "Microsoft Surface Pro 9",
+      "system": { "vendor": "Microsoft Corporation", "product": "Surface Pro 9", "version": "", "sku": "Surface_Pro_9_2038", "family": "Surface" },
+      "bios": { "vendor": "Microsoft Corporation", "version": "5.12.140", "date": "01/25/2024", "major": "5", "minor": "12", "firmware_major": "5", "firmware_minor": "12" },
+      "board": { "vendor": "Microsoft Corporation", "product": "Surface Pro 9", "version": "D" },
+      "chassis": { "vendor": "Microsoft Corporation", "version": "", "type": "9" },
+      "acpi": { "oem_id": "MSFT  ", "creator_id": "MSFT", "creator_rev": "20240125" }
+    },
+    "microsoft_surface_laptop5": {
+      "label": "Microsoft Surface Laptop 5",
+      "system": { "vendor": "Microsoft Corporation", "product": "Surface Laptop 5", "version": "", "sku": "Surface_Laptop_5_1950", "family": "Surface" },
+      "bios": { "vendor": "Microsoft Corporation", "version": "3.21.140", "date": "08/14/2024", "major": "3", "minor": "21", "firmware_major": "3", "firmware_minor": "21" },
+      "board": { "vendor": "Microsoft Corporation", "product": "Surface Laptop 5", "version": "C" },
+      "chassis": { "vendor": "Microsoft Corporation", "version": "", "type": "10" },
+      "acpi": { "oem_id": "MSFT  ", "creator_id": "MSFT", "creator_rev": "20240814" }
+    },
+    "microsoft_surface_laptop_studio2": {
+      "label": "Microsoft Surface Laptop Studio 2",
+      "system": { "vendor": "Microsoft Corporation", "product": "Surface Laptop Studio 2", "version": "", "sku": "Surface_Laptop_Studio_2_2029", "family": "Surface" },
+      "bios": { "vendor": "Microsoft Corporation", "version": "2.16.140", "date": "09/20/2024", "major": "2", "minor": "16", "firmware_major": "2", "firmware_minor": "16" },
+      "board": { "vendor": "Microsoft Corporation", "product": "Surface Laptop Studio 2", "version": "B" },
+      "chassis": { "vendor": "Microsoft Corporation", "version": "", "type": "31" },
+      "acpi": { "oem_id": "MSFT  ", "creator_id": "MSFT", "creator_rev": "20240920" }
+    },
+    "msi_gs66_stealth": {
+      "label": "MSI GS66 Stealth (Gaming)",
+      "system": { "vendor": "Micro-Star International Co., Ltd.", "product": "GS66 Stealth 12UGS", "version": "REV:1.0", "sku": "", "family": "GS66 Stealth" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "E16V7IMS.10C", "date": "09/15/2023", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "Micro-Star International Co., Ltd.", "product": "MS-16V7", "version": "REV:1.0" },
+      "chassis": { "vendor": "Micro-Star International Co., Ltd.", "version": "REV:1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20230915" }
+    },
+    "msi_raider_ge78": {
+      "label": "MSI Raider GE78 HX (Gaming)",
+      "system": { "vendor": "Micro-Star International Co., Ltd.", "product": "Raider GE78 HX 13VH", "version": "REV:1.0", "sku": "", "family": "Raider GE78 HX" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "E17RCIMS.10A", "date": "01/20/2024", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "Micro-Star International Co., Ltd.", "product": "MS-17RC", "version": "REV:1.0" },
+      "chassis": { "vendor": "Micro-Star International Co., Ltd.", "version": "REV:1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20240120" }
+    },
+    "msi_prestige_14": {
+      "label": "MSI Prestige 14 Evo",
+      "system": { "vendor": "Micro-Star International Co., Ltd.", "product": "Prestige 14 Evo B13M", "version": "REV:1.0", "sku": "", "family": "Prestige 14 Evo" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "E14F2IMS.108", "date": "06/12/2024", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "Micro-Star International Co., Ltd.", "product": "MS-14F2", "version": "REV:1.0" },
+      "chassis": { "vendor": "Micro-Star International Co., Ltd.", "version": "REV:1.0", "type": "10" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20240612" }
+    },
+    "samsung_galaxy_book3_pro": {
+      "label": "Samsung Galaxy Book3 Pro 360",
+      "system": { "vendor": "SAMSUNG ELECTRONICS CO., LTD.", "product": "960QFG", "version": "P08RDL", "sku": "", "family": "Galaxy Book3 Pro 360" },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "P08RDL.048.230623.ZQ", "date": "06/23/2023", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "SAMSUNG ELECTRONICS CO., LTD.", "product": "NP960QFG-KA1US", "version": "SGLA419A0B-C01-G001-S0001+10.0.22000" },
+      "chassis": { "vendor": "SAMSUNG ELECTRONICS CO., LTD.", "version": "", "type": "31" },
+      "acpi": { "oem_id": "SECCSD", "creator_id": "SEC ", "creator_rev": "20230623" }
+    },
+    "huawei_matebook_x_pro": {
+      "label": "Huawei MateBook X Pro 2024",
+      "system": { "vendor": "HUAWEI", "product": "MRGF-XX", "version": "M1040", "sku": "C100", "family": "MateBook X Pro" },
+      "bios": { "vendor": "HUAWEI", "version": "1.22", "date": "04/15/2024", "major": "1", "minor": "22", "firmware_major": "1", "firmware_minor": "18" },
+      "board": { "vendor": "HUAWEI", "product": "MRGF-XX-PCB", "version": "M1040" },
+      "chassis": { "vendor": "HUAWEI", "version": "", "type": "10" },
+      "acpi": { "oem_id": "HUAWEI", "creator_id": "HW  ", "creator_rev": "20240415" }
+    },
+    "razer_blade_16": {
+      "label": "Razer Blade 16 (Gaming)",
+      "system": { "vendor": "Razer", "product": "Blade 16 - RZ09-0483", "version": "3.04", "sku": "", "family": "Blade" },
+      "bios": { "vendor": "Razer", "version": "1.08", "date": "02/28/2024", "major": "1", "minor": "8", "firmware_major": "1", "firmware_minor": "8" },
+      "board": { "vendor": "Razer", "product": "DA750", "version": "4" },
+      "chassis": { "vendor": "Razer", "version": "", "type": "10" },
+      "acpi": { "oem_id": "RAZER ", "creator_id": "RZR ", "creator_rev": "20240228" }
+    },
+    "framework_laptop_16": {
+      "label": "Framework Laptop 16",
+      "system": { "vendor": "Framework", "product": "Laptop 16 (AMD Ryzen 7040 Series)", "version": "A8", "sku": "FRANDGCP08", "family": "Laptop" },
+      "bios": { "vendor": "INSYDE Corp.", "version": "03.05", "date": "04/10/2024", "major": "3", "minor": "5", "firmware_major": "3", "firmware_minor": "5" },
+      "board": { "vendor": "Framework", "product": "FRANMDCP08", "version": "A8" },
+      "chassis": { "vendor": "Framework", "version": "A8", "type": "10" },
+      "acpi": { "oem_id": "FRMWRK", "creator_id": "FRMW", "creator_rev": "20240410" }
+    },
+    "desktop_custom_intel": {
+      "label": "PC Sobremesa generico (Intel)",
+      "system": { "vendor": "To Be Filled By O.E.M.", "product": "To Be Filled By O.E.M.", "version": "To Be Filled By O.E.M.", "sku": "To Be Filled By O.E.M.", "family": "To Be Filled By O.E.M." },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "2.10", "date": "06/12/2024", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "ASRock", "product": "B660M Pro RS", "version": "" },
+      "chassis": { "vendor": "Default string", "version": "Default string", "type": "3" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20240612" }
+    },
+    "desktop_custom_amd": {
+      "label": "PC Sobremesa generico (AMD)",
+      "system": { "vendor": "To Be Filled By O.E.M.", "product": "To Be Filled By O.E.M.", "version": "To Be Filled By O.E.M.", "sku": "To Be Filled By O.E.M.", "family": "To Be Filled By O.E.M." },
+      "bios": { "vendor": "American Megatrends International, LLC.", "version": "4.03", "date": "08/22/2024", "major": "5", "minor": "27", "firmware_major": "2", "firmware_minor": "27" },
+      "board": { "vendor": "Gigabyte Technology Co., Ltd.", "product": "B650 AORUS ELITE AX", "version": "x.x" },
+      "chassis": { "vendor": "Default string", "version": "Default string", "type": "3" },
+      "acpi": { "oem_id": "ALASKA", "creator_id": "AMI ", "creator_rev": "20240822" }
+    }
+  },
+
+  "cpus": {
+    "intel_i9_14900k":   { "label": "Intel Core i9-14900K",    "brand": "Intel(R) Core(TM) i9-14900K",    "cores": 24 },
+    "intel_i9_13900k":   { "label": "Intel Core i9-13900K",    "brand": "Intel(R) Core(TM) i9-13900K",    "cores": 24 },
+    "intel_i9_13900h":   { "label": "Intel Core i9-13900H",    "brand": "Intel(R) Core(TM) i9-13900H",    "cores": 14 },
+    "intel_i7_14700k":   { "label": "Intel Core i7-14700K",    "brand": "Intel(R) Core(TM) i7-14700K",    "cores": 20 },
+    "intel_i7_13700k":   { "label": "Intel Core i7-13700K",    "brand": "Intel(R) Core(TM) i7-13700K",    "cores": 16 },
+    "intel_i7_1365u":    { "label": "Intel Core i7-1365U",     "brand": "Intel(R) Core(TM) i7-1365U",     "cores": 10 },
+    "intel_i7_1355u":    { "label": "Intel Core i7-1355U",     "brand": "Intel(R) Core(TM) i7-1355U",     "cores": 10 },
+    "intel_i7_1255u":    { "label": "Intel Core i7-1255U",     "brand": "Intel(R) Core(TM) i7-1255U",     "cores": 10 },
+    "intel_i5_14600k":   { "label": "Intel Core i5-14600K",    "brand": "Intel(R) Core(TM) i5-14600K",    "cores": 14 },
+    "intel_i5_13600k":   { "label": "Intel Core i5-13600K",    "brand": "Intel(R) Core(TM) i5-13600K",    "cores": 14 },
+    "intel_i5_1345u":    { "label": "Intel Core i5-1345U",     "brand": "Intel(R) Core(TM) i5-1345U",     "cores": 10 },
+    "intel_i5_1335u":    { "label": "Intel Core i5-1335U",     "brand": "Intel(R) Core(TM) i5-1335U",     "cores": 10 },
+    "intel_i5_1235u":    { "label": "Intel Core i5-1235U",     "brand": "Intel(R) Core(TM) i5-1235U",     "cores": 10 },
+    "intel_i3_13100":    { "label": "Intel Core i3-13100",     "brand": "Intel(R) Core(TM) i3-13100",     "cores": 4 },
+    "intel_i3_1215u":    { "label": "Intel Core i3-1215U",     "brand": "Intel(R) Core(TM) i3-1215U",     "cores": 6 },
+    "intel_ultra9_185h":  { "label": "Intel Core Ultra 9 185H",  "brand": "Intel(R) Core(TM) Ultra 9 185H",  "cores": 16 },
+    "intel_ultra7_155h":  { "label": "Intel Core Ultra 7 155H",  "brand": "Intel(R) Core(TM) Ultra 7 155H",  "cores": 16 },
+    "intel_ultra5_125h":  { "label": "Intel Core Ultra 5 125H",  "brand": "Intel(R) Core(TM) Ultra 5 125H",  "cores": 14 },
+    "intel_ultra7_265k":  { "label": "Intel Core Ultra 7 265K (Arrow Lake)", "brand": "Intel(R) Core(TM) Ultra 7 265K", "cores": 20 },
+    "intel_ultra9_285k":  { "label": "Intel Core Ultra 9 285K (Arrow Lake)", "brand": "Intel(R) Core(TM) Ultra 9 285K", "cores": 24 },
+    "amd_r9_7950x":      { "label": "AMD Ryzen 9 7950X",      "brand": "AMD Ryzen 9 7950X 16-Core",      "cores": 16 },
+    "amd_r9_7945hx":     { "label": "AMD Ryzen 9 7945HX",     "brand": "AMD Ryzen 9 7945HX",             "cores": 16 },
+    "amd_r9_9950x":      { "label": "AMD Ryzen 9 9950X",      "brand": "AMD Ryzen 9 9950X 16-Core",      "cores": 16 },
+    "amd_r7_7800x3d":    { "label": "AMD Ryzen 7 7800X3D",    "brand": "AMD Ryzen 7 7800X3D 8-Core",     "cores": 8 },
+    "amd_r7_7840hs":     { "label": "AMD Ryzen 7 7840HS",     "brand": "AMD Ryzen 7 7840HS",             "cores": 8 },
+    "amd_r7_8845hs":     { "label": "AMD Ryzen 7 8845HS",     "brand": "AMD Ryzen 7 8845HS",             "cores": 8 },
+    "amd_r5_7600x":      { "label": "AMD Ryzen 5 7600X",      "brand": "AMD Ryzen 5 7600X 6-Core",       "cores": 6 },
+    "amd_r5_7640hs":     { "label": "AMD Ryzen 5 7640HS",     "brand": "AMD Ryzen 5 7640HS",             "cores": 6 },
+    "amd_r5_8645hs":     { "label": "AMD Ryzen 5 8645HS",     "brand": "AMD Ryzen 5 8645HS",             "cores": 6 },
+    "amd_r9_ai_hx370":   { "label": "AMD Ryzen AI 9 HX 370 (Strix Point)", "brand": "AMD Ryzen AI 9 HX 370", "cores": 12 },
+    "apple_m1":          { "label": "Apple M1",                "brand": "Apple M1",                        "cores": 8 },
+    "apple_m2":          { "label": "Apple M2",                "brand": "Apple M2",                        "cores": 8 },
+    "apple_m2_pro":      { "label": "Apple M2 Pro",            "brand": "Apple M2 Pro",                    "cores": 12 },
+    "apple_m3":          { "label": "Apple M3",                "brand": "Apple M3",                        "cores": 8 },
+    "apple_m3_pro":      { "label": "Apple M3 Pro",            "brand": "Apple M3 Pro",                    "cores": 12 },
+    "apple_m3_max":      { "label": "Apple M3 Max",            "brand": "Apple M3 Max",                    "cores": 16 },
+    "apple_m4":          { "label": "Apple M4",                "brand": "Apple M4",                        "cores": 10 },
+    "apple_m4_pro":      { "label": "Apple M4 Pro",            "brand": "Apple M4 Pro",                    "cores": 14 }
+  },
+
+  "disks": {
+    "wd_sn850x_1tb":       { "label": "WD Black SN850X 1TB NVMe",       "vendor": "Western Digital", "model": "WDC WDS100T2X0E-00BVL0", "serial_prefix": "WD-WMC4N", "firmware": "620311WD", "type": "NVMe" },
+    "wd_sn770_500gb":      { "label": "WD Blue SN770 500GB NVMe",       "vendor": "Western Digital", "model": "WDC WDS500G3B0C-00PXH0", "serial_prefix": "WD-WX52A", "firmware": "234100WD", "type": "NVMe" },
+    "wd_sn580_1tb":        { "label": "WD Blue SN580 1TB NVMe",         "vendor": "Western Digital", "model": "WDC WDS100T3B0E-00CHF0", "serial_prefix": "WD-WX71A", "firmware": "281010WD", "type": "NVMe" },
+    "wd_sn7100_2tb":       { "label": "WD Black SN7100 2TB NVMe",       "vendor": "Western Digital", "model": "WD_BLACK SN7100 2TB",     "serial_prefix": "WD-WY82B", "firmware": "7613H0WD", "type": "NVMe" },
+    "samsung_990pro_1tb":  { "label": "Samsung 990 Pro 1TB NVMe",       "vendor": "Samsung",         "model": "Samsung SSD 990 PRO 1TB",  "serial_prefix": "S6Z2NF", "firmware": "4B2QJXD7", "type": "NVMe" },
+    "samsung_990pro_2tb":  { "label": "Samsung 990 Pro 2TB NVMe",       "vendor": "Samsung",         "model": "Samsung SSD 990 PRO 2TB",  "serial_prefix": "S6Z2NG", "firmware": "4B2QJXD7", "type": "NVMe" },
+    "samsung_980pro_1tb":  { "label": "Samsung 980 Pro 1TB NVMe",       "vendor": "Samsung",         "model": "Samsung SSD 980 PRO 1TB",  "serial_prefix": "S5GXNF", "firmware": "5B2QGXA7", "type": "NVMe" },
+    "samsung_970evo_500":  { "label": "Samsung 970 EVO Plus 500GB",     "vendor": "Samsung",         "model": "Samsung SSD 970 EVO Plus 500GB", "serial_prefix": "S4EWNX", "firmware": "2B2QEXM7", "type": "NVMe" },
+    "samsung_870evo_1tb":  { "label": "Samsung 870 EVO 1TB SATA",       "vendor": "Samsung",         "model": "Samsung SSD 870 EVO 1TB",  "serial_prefix": "S6PENX", "firmware": "SVT02B6Q", "type": "SSD" },
+    "samsung_860evo_500":  { "label": "Samsung 860 EVO 500GB SATA",     "vendor": "Samsung",         "model": "Samsung SSD 860 EVO 500GB","serial_prefix": "S5GENJ", "firmware": "RVT04B6Q", "type": "SSD" },
+    "samsung_990evo_1tb":  { "label": "Samsung 990 EVO 1TB NVMe",       "vendor": "Samsung",         "model": "Samsung SSD 990 EVO 1TB",  "serial_prefix": "S7GXNK", "firmware": "1B2QJXE7", "type": "NVMe" },
+    "kingston_nv2_1tb":    { "label": "Kingston NV2 1TB NVMe",          "vendor": "Kingston Technology", "model": "KINGSTON SNV2S1000G",   "serial_prefix": "50026B76", "firmware": "S8442105", "type": "NVMe" },
+    "kingston_fury_2tb":   { "label": "Kingston FURY Renegade 2TB NVMe","vendor": "Kingston Technology", "model": "KINGSTON SFYRD2000G",   "serial_prefix": "50026B78", "firmware": "EIFK31.6", "type": "NVMe" },
+    "kingston_a400_480":   { "label": "Kingston A400 480GB SATA",       "vendor": "Kingston Technology", "model": "KINGSTON SA400S37480G",  "serial_prefix": "50026B77", "firmware": "SBFKB1D1", "type": "SSD" },
+    "crucial_p5plus_1tb":  { "label": "Crucial P5 Plus 1TB NVMe",       "vendor": "Crucial Technology", "model": "CT1000P5PSSD8",          "serial_prefix": "2325E6", "firmware": "P7CR403", "type": "NVMe" },
+    "crucial_t700_2tb":    { "label": "Crucial T700 2TB NVMe Gen5",     "vendor": "Crucial Technology", "model": "CT2000T700SSD3",          "serial_prefix": "2425F8", "firmware": "T9CR104", "type": "NVMe" },
+    "crucial_mx500_1tb":   { "label": "Crucial MX500 1TB SATA",         "vendor": "Crucial Technology", "model": "CT1000MX500SSD1",         "serial_prefix": "2325E7", "firmware": "M3CR046", "type": "SSD" },
+    "seagate_barracuda_2t":{ "label": "Seagate Barracuda 2TB HDD",      "vendor": "Seagate",         "model": "ST2000DM008-2UB102",       "serial_prefix": "ZFL1", "firmware": "0001", "type": "HDD" },
+    "seagate_firecuda_530":{ "label": "Seagate FireCuda 530 1TB NVMe",  "vendor": "Seagate",         "model": "ZP1000GM30013",            "serial_prefix": "7VS0", "firmware": "SU6SM001", "type": "NVMe" },
+    "toshiba_mq04_1tb":    { "label": "Toshiba MQ04ABF100 1TB HDD",     "vendor": "Toshiba",         "model": "TOSHIBA MQ04ABF100",       "serial_prefix": "Y9RDP", "firmware": "JU001A", "type": "HDD" },
+    "sk_hynix_p41_1tb":    { "label": "SK Hynix P41 Platinum 1TB NVMe", "vendor": "SK Hynix",        "model": "HFS001TEJ9X115N",          "serial_prefix": "NI", "firmware": "41060C20", "type": "NVMe" },
+    "intel_670p_1tb":      { "label": "Intel 670p 1TB NVMe",            "vendor": "Intel",           "model": "SSDPEKNU010TZ",            "serial_prefix": "PHKA", "firmware": "002C", "type": "NVMe" },
+    "apple_ap0512q":       { "label": "Apple AP0512Q (MacBook SSD)",    "vendor": "Apple",           "model": "APPLE SSD AP0512Q",        "serial_prefix": "C02", "firmware": "180.2", "type": "NVMe" },
+    "apple_ap1024z":       { "label": "Apple AP1024Z (MacBook SSD)",    "vendor": "Apple",           "model": "APPLE SSD AP1024Z",        "serial_prefix": "C02", "firmware": "342.100", "type": "NVMe" }
+  },
+
+  "gpus": {
+    "intel_uhd_770":       { "label": "Intel UHD Graphics 770",          "pci_name": "Intel Corporation UHD Graphics 770" },
+    "intel_uhd_730":       { "label": "Intel UHD Graphics 730",          "pci_name": "Intel Corporation UHD Graphics 730" },
+    "intel_uhd_620":       { "label": "Intel UHD Graphics 620",          "pci_name": "Intel Corporation UHD Graphics 620" },
+    "intel_iris_xe":       { "label": "Intel Iris Xe Graphics",          "pci_name": "Intel Corporation Iris Xe Graphics" },
+    "intel_iris_xe_max":   { "label": "Intel Iris Xe MAX Graphics",      "pci_name": "Intel Corporation Iris Xe MAX Graphics" },
+    "intel_iris_plus_655": { "label": "Intel Iris Plus Graphics 655",    "pci_name": "Intel Corporation Iris Plus Graphics 655" },
+    "intel_arc_a770":      { "label": "Intel Arc A770",                  "pci_name": "Intel Corporation Arc A770 Graphics" },
+    "intel_arc_a750":      { "label": "Intel Arc A750",                  "pci_name": "Intel Corporation Arc A750 Graphics" },
+    "intel_arc_a580":      { "label": "Intel Arc A580",                  "pci_name": "Intel Corporation Arc A580 Graphics" },
+    "intel_arc_b580":      { "label": "Intel Arc B580 (Battlemage)",     "pci_name": "Intel Corporation Arc B580 Graphics" },
+    "amd_radeon_780m":     { "label": "AMD Radeon 780M",                "pci_name": "AMD/ATI Radeon 780M Graphics" },
+    "amd_radeon_680m":     { "label": "AMD Radeon 680M",                "pci_name": "AMD/ATI Radeon 680M Graphics" },
+    "amd_radeon_890m":     { "label": "AMD Radeon 890M (Strix Point)",  "pci_name": "AMD/ATI Radeon 890M Graphics" },
+    "amd_radeon_vega8":    { "label": "AMD Radeon Vega 8",              "pci_name": "AMD/ATI Radeon Vega 8 Graphics" },
+    "amd_rx9070xt":        { "label": "AMD Radeon RX 9070 XT",          "pci_name": "AMD/ATI Radeon RX 9070 XT" },
+    "amd_rx7900xtx":       { "label": "AMD Radeon RX 7900 XTX",         "pci_name": "AMD/ATI Radeon RX 7900 XTX" },
+    "amd_rx7800xt":        { "label": "AMD Radeon RX 7800 XT",          "pci_name": "AMD/ATI Radeon RX 7800 XT" },
+    "amd_rx7600":          { "label": "AMD Radeon RX 7600",             "pci_name": "AMD/ATI Radeon RX 7600" },
+    "nvidia_rtx5090":      { "label": "NVIDIA GeForce RTX 5090",        "pci_name": "NVIDIA Corporation GeForce RTX 5090" },
+    "nvidia_rtx5080":      { "label": "NVIDIA GeForce RTX 5080",        "pci_name": "NVIDIA Corporation GeForce RTX 5080" },
+    "nvidia_rtx5070ti":    { "label": "NVIDIA GeForce RTX 5070 Ti",     "pci_name": "NVIDIA Corporation GeForce RTX 5070 Ti" },
+    "nvidia_rtx5070":      { "label": "NVIDIA GeForce RTX 5070",        "pci_name": "NVIDIA Corporation GeForce RTX 5070" },
+    "nvidia_rtx4090":      { "label": "NVIDIA GeForce RTX 4090",        "pci_name": "NVIDIA Corporation GeForce RTX 4090" },
+    "nvidia_rtx4080":      { "label": "NVIDIA GeForce RTX 4080 SUPER",  "pci_name": "NVIDIA Corporation GeForce RTX 4080 SUPER" },
+    "nvidia_rtx4070ti":    { "label": "NVIDIA GeForce RTX 4070 Ti SUPER","pci_name": "NVIDIA Corporation GeForce RTX 4070 Ti SUPER" },
+    "nvidia_rtx4070":      { "label": "NVIDIA GeForce RTX 4070",        "pci_name": "NVIDIA Corporation GeForce RTX 4070" },
+    "nvidia_rtx4060":      { "label": "NVIDIA GeForce RTX 4060",        "pci_name": "NVIDIA Corporation GeForce RTX 4060" },
+    "nvidia_rtx3080":      { "label": "NVIDIA GeForce RTX 3080",        "pci_name": "NVIDIA Corporation GeForce RTX 3080" },
+    "nvidia_rtx3070":      { "label": "NVIDIA GeForce RTX 3070",        "pci_name": "NVIDIA Corporation GeForce RTX 3070" },
+    "nvidia_rtx3060":      { "label": "NVIDIA GeForce RTX 3060",        "pci_name": "NVIDIA Corporation GeForce RTX 3060" },
+    "nvidia_gtx1660s":     { "label": "NVIDIA GeForce GTX 1660 SUPER",  "pci_name": "NVIDIA Corporation GeForce GTX 1660 SUPER" },
+    "apple_m1_gpu":        { "label": "Apple M1 GPU (8-core)",          "pci_name": "Apple Inc. Apple M1 GPU" },
+    "apple_m2_gpu":        { "label": "Apple M2 GPU (10-core)",         "pci_name": "Apple Inc. Apple M2 GPU" },
+    "apple_m3_gpu":        { "label": "Apple M3 GPU (10-core)",         "pci_name": "Apple Inc. Apple M3 GPU" },
+    "apple_m3_pro_gpu":    { "label": "Apple M3 Pro GPU (18-core)",     "pci_name": "Apple Inc. Apple M3 Pro GPU" },
+    "apple_m4_gpu":        { "label": "Apple M4 GPU (10-core)",         "pci_name": "Apple Inc. Apple M4 GPU" }
+  },
+
+  "nics": {
+    "intel_ax211":         { "label": "Intel Wi-Fi 6E AX211 (portatil moderno)",  "mac_prefix": "8C:8C:AA", "pci_name": "Intel Corporation Wi-Fi 6E AX211 160MHz" },
+    "intel_ax201":         { "label": "Intel Wi-Fi 6 AX201 (portatil)",           "mac_prefix": "DC:41:A9", "pci_name": "Intel Corporation Wi-Fi 6 AX201 160MHz" },
+    "intel_ax200":         { "label": "Intel Wi-Fi 6 AX200 (sobremesa)",          "mac_prefix": "3C:7C:3F", "pci_name": "Intel Corporation Wi-Fi 6 AX200" },
+    "intel_be200":         { "label": "Intel Wi-Fi 7 BE200 (2024+)",              "mac_prefix": "A4:B1:C1", "pci_name": "Intel Corporation Wi-Fi 7 BE200 320MHz" },
+    "intel_i226v":         { "label": "Intel I226-V 2.5G Ethernet",               "mac_prefix": "04:7C:16", "pci_name": "Intel Corporation Ethernet Controller I226-V" },
+    "intel_i225v":         { "label": "Intel I225-V 2.5G Ethernet",               "mac_prefix": "04:42:1A", "pci_name": "Intel Corporation Ethernet Controller I225-V" },
+    "intel_i219v":         { "label": "Intel I219-V Gigabit Ethernet",            "mac_prefix": "B4:2E:99", "pci_name": "Intel Corporation Ethernet Connection I219-V" },
+    "intel_82574l":        { "label": "Intel 82574L Gigabit (servidor)",           "mac_prefix": "00:1B:21", "pci_name": "Intel Corporation 82574L Gigabit Network Connection" },
+    "realtek_8125bg":      { "label": "Realtek RTL8125BG 2.5G Ethernet",          "mac_prefix": "2C:F0:5D", "pci_name": "Realtek Semiconductor RTL8125 2.5GbE Controller" },
+    "realtek_8111":        { "label": "Realtek RTL8111 Gigabit Ethernet",          "mac_prefix": "D8:BB:C1", "pci_name": "Realtek Semiconductor RTL8111/8168/8411 PCI Express Gigabit" },
+    "realtek_8852ce":      { "label": "Realtek RTL8852CE Wi-Fi 6E",               "mac_prefix": "E8:D8:D1", "pci_name": "Realtek Semiconductor RTL8852CE 802.11ax PCIe Wireless" },
+    "realtek_8922ae":      { "label": "Realtek RTL8922AE Wi-Fi 7",                "mac_prefix": "FC:B3:BC", "pci_name": "Realtek Semiconductor RTL8922AE 802.11be PCIe Wireless" },
+    "broadcom_bcm4360":    { "label": "Broadcom BCM4360 Wi-Fi (Apple Mac)",        "mac_prefix": "A8:66:7F", "pci_name": "Broadcom BCM4360 802.11ac Dual Band Wireless" },
+    "broadcom_bcm4387":    { "label": "Broadcom BCM4387 Wi-Fi 6E (Apple M2+)",    "mac_prefix": "F0:18:98", "pci_name": "Broadcom BCM4387 802.11ax Wireless" },
+    "qualcomm_qcnfa765":   { "label": "Qualcomm QCNFA765 Wi-Fi 6E",              "mac_prefix": "A0:29:42", "pci_name": "Qualcomm Atheros QCNFA765 Wireless Network Adapter" },
+    "qualcomm_fastconnect7800": { "label": "Qualcomm FastConnect 7800 Wi-Fi 7",   "mac_prefix": "7C:B5:66", "pci_name": "Qualcomm FastConnect 7800 Wi-Fi 7" },
+    "mediatek_mt7921":     { "label": "MediaTek MT7921 Wi-Fi 6 (economico)",      "mac_prefix": "58:CE:2A", "pci_name": "MediaTek MT7921 802.11ax PCI Express Wireless" },
+    "mediatek_mt7925":     { "label": "MediaTek MT7925 Wi-Fi 7",                  "mac_prefix": "74:12:B3", "pci_name": "MediaTek MT7925 802.11be PCI Express Wireless" },
+    "killer_ax1690":       { "label": "Killer Wi-Fi 6E AX1690 (gaming)",           "mac_prefix": "9C:2D:CD", "pci_name": "Intel Corporation Killer Wi-Fi 6E AX1690 160MHz" },
+    "killer_be1750x":      { "label": "Killer Wi-Fi 7 BE1750x (gaming 2024)",     "mac_prefix": "48:51:C5", "pci_name": "Intel Corporation Killer Wi-Fi 7 BE1750x 320MHz" },
+    "apple_wifi_sonoma":   { "label": "Apple Wi-Fi (macOS Sonoma/Sequoia)",        "mac_prefix": "F0:18:98", "pci_name": "Apple Wi-Fi Adapter" },
+    "apple_ethernet_tb":   { "label": "Apple Thunderbolt Ethernet (Mac)",          "mac_prefix": "A4:83:E7", "pci_name": "Apple Thunderbolt Ethernet Adapter" }
+  },
+
+  "ram_options": [
+    { "value": 2048,  "label": "2 GB" },
+    { "value": 4096,  "label": "4 GB" },
+    { "value": 8192,  "label": "8 GB" },
+    { "value": 12288, "label": "12 GB" },
+    { "value": 16384, "label": "16 GB" },
+    { "value": 24576, "label": "24 GB" },
+    { "value": 32768, "label": "32 GB" },
+    { "value": 49152, "label": "48 GB" },
+    { "value": 65536, "label": "64 GB" },
+    { "value": 98304, "label": "96 GB" },
+    { "value": 131072,"label": "128 GB" }
+  ],
+
+  "disk_sizes": [
+    { "value": 25600,   "label": "25 GB" },
+    { "value": 51200,   "label": "50 GB" },
+    { "value": 102400,  "label": "100 GB" },
+    { "value": 153600,  "label": "150 GB" },
+    { "value": 256000,  "label": "250 GB" },
+    { "value": 512000,  "label": "500 GB" },
+    { "value": 1024000, "label": "1 TB" },
+    { "value": 2048000, "label": "2 TB" },
+    { "value": 4096000, "label": "4 TB" }
+  ],
+
+  "cpu_cores_vm": [
+    { "value": 1,  "label": "1 core" },
+    { "value": 2,  "label": "2 cores" },
+    { "value": 4,  "label": "4 cores" },
+    { "value": 6,  "label": "6 cores" },
+    { "value": 8,  "label": "8 cores" },
+    { "value": 10, "label": "10 cores" },
+    { "value": 12, "label": "12 cores" },
+    { "value": 16, "label": "16 cores" },
+    { "value": 20, "label": "20 cores" },
+    { "value": 24, "label": "24 cores" }
+  ],
+
+  "lspci_templates": {
+    "intel_12th_gen": {
+      "host_bridge": "Intel Corporation 12th Gen Core Processor Host Bridge",
+      "isa_bridge": "Intel Corporation Alder Lake PCH eSPI Controller",
+      "ide": "Intel Corporation Alder Lake-P SATA AHCI Controller",
+      "guest_service": "Intel Corporation Thunderbolt 4 NHI",
+      "acpi_bridge": "Intel Corporation Alder Lake PCH-P LPC Controller",
+      "audio": "Intel Corporation Alder Lake PCH-P High Definition Audio Controller"
+    },
+    "intel_13th_gen": {
+      "host_bridge": "Intel Corporation 13th Gen Core Processor Host Bridge",
+      "isa_bridge": "Intel Corporation Raptor Lake PCH eSPI Controller",
+      "ide": "Intel Corporation Raptor Lake SATA AHCI Controller",
+      "guest_service": "Intel Corporation Thunderbolt 4 NHI",
+      "acpi_bridge": "Intel Corporation Raptor Lake PCH-P LPC/eSPI Controller",
+      "audio": "Intel Corporation Raptor Lake-P High Definition Audio Controller"
+    },
+    "intel_14th_gen": {
+      "host_bridge": "Intel Corporation 14th Gen Core Processor Host Bridge",
+      "isa_bridge": "Intel Corporation Raptor Lake-S PCH eSPI Controller",
+      "ide": "Intel Corporation Raptor Lake SATA AHCI Controller",
+      "guest_service": "Intel Corporation Thunderbolt 4 NHI [Maple Ridge 4C 2020]",
+      "acpi_bridge": "Intel Corporation Raptor Lake LPC/eSPI Controller",
+      "audio": "Intel Corporation Raptor Lake High Definition Audio Controller"
+    },
+    "intel_meteor_lake": {
+      "host_bridge": "Intel Corporation Meteor Lake-P Host Bridge",
+      "isa_bridge": "Intel Corporation Meteor Lake-P eSPI Controller",
+      "ide": "Intel Corporation Meteor Lake-P SATA AHCI Controller",
+      "guest_service": "Intel Corporation Thunderbolt 4 USB Controller",
+      "acpi_bridge": "Intel Corporation Meteor Lake-P LPC/eSPI Controller",
+      "audio": "Intel Corporation Meteor Lake-P HD Audio Controller"
+    },
+    "intel_arrow_lake": {
+      "host_bridge": "Intel Corporation Arrow Lake-S Host Bridge",
+      "isa_bridge": "Intel Corporation Arrow Lake PCH eSPI Controller",
+      "ide": "Intel Corporation Arrow Lake SATA AHCI Controller",
+      "guest_service": "Intel Corporation Thunderbolt 5 NHI",
+      "acpi_bridge": "Intel Corporation Arrow Lake LPC/eSPI Controller",
+      "audio": "Intel Corporation Arrow Lake High Definition Audio Controller"
+    },
+    "amd_zen4": {
+      "host_bridge": "AMD Raphael Root Complex",
+      "isa_bridge": "AMD FCH LPC Bridge",
+      "ide": "AMD FCH SATA Controller [AHCI mode]",
+      "guest_service": "AMD USB 4.0 Host Controller",
+      "acpi_bridge": "AMD FCH SMBus Controller",
+      "audio": "AMD Family 17h/19h HD Audio Controller"
+    },
+    "amd_zen5": {
+      "host_bridge": "AMD Granite Ridge Root Complex",
+      "isa_bridge": "AMD FCH LPC Bridge",
+      "ide": "AMD FCH SATA Controller [AHCI mode]",
+      "guest_service": "AMD USB 4.0 Host Controller",
+      "acpi_bridge": "AMD FCH SMBus Controller",
+      "audio": "AMD Rembrandt Radeon High Definition Audio Controller"
+    },
+    "apple_intel": {
+      "host_bridge": "Intel Corporation Coffee Lake Host Bridge/DRAM Registers",
+      "isa_bridge": "Intel Corporation Cannon Lake PCH cAVS",
+      "ide": "Intel Corporation Cannon Lake Mobile PCH SATA AHCI Controller",
+      "guest_service": "Apple Inc. Thunderbolt 3 Controller",
+      "acpi_bridge": "Intel Corporation Cannon Lake LPC Controller",
+      "audio": "Intel Corporation Cannon Lake PCH cAVS"
+    },
+    "apple_silicon": {
+      "host_bridge": "Apple Inc. Apple Silicon Host Bridge",
+      "isa_bridge": "Apple Inc. Apple Silicon LPC Controller",
+      "ide": "Apple Inc. ANS2 NVMe Controller",
+      "guest_service": "Apple Inc. Thunderbolt/USB4 Controller",
+      "acpi_bridge": "Apple Inc. Apple Silicon PMC",
+      "audio": "Apple Inc. Apple Silicon Audio Controller"
+    }
+  }
+}

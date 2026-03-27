@@ -1,0 +1,232 @@
+============================================
+ VM Spoofer - Instrucciones para Linux
+============================================
+
+Qué es VM Spoofer?
+------------------
+Camufla máquinas virtuales de VirtualBox para que no sean
+detectadas por herramientas como systeminformation.
+Cambia fabricante, BIOS, placa base, disco, GPU, MAC y más.
+
+
+REQUISITOS
+----------
+  - VirtualBox: el programa de máquinas virtuales donde
+    tienes la VM que quieres camuflar.
+    Instalar: sudo apt install virtualbox
+  - jq: herramienta para leer archivos JSON desde el
+    terminal. El script lo necesita para leer la base de
+    datos de hardware (hardware-db.json) y extraer los
+    perfiles de fabricante, CPU, disco, etc.
+    Instalar: sudo apt install jq
+  - whiptail: programa que muestra menús gráficos dentro
+    del terminal (las pantallas con opciones que verás al
+    ejecutar el script). Suele venir preinstalado en la
+    mayoría de distribuciones Linux.
+    Instalar: sudo apt install whiptail
+  - Una VM ya creada en VirtualBox (Windows o Linux)
+  - Los archivos: vm-spoofer.sh, hardware-db.json, check.js
+
+  Instalar todo de golpe:
+    sudo apt install virtualbox jq whiptail
+
+
+CÓMO USAR
+---------
+
+1. Abrir terminal
+
+2. Ir a la carpeta del script
+   cd ruta/a/vm-creator
+
+3. Dar permisos de ejecución (solo la primera vez)
+   chmod +x vm-spoofer.sh
+
+4. Ejecutar
+   ./vm-spoofer.sh
+
+   O si prefieres sin dar permisos:
+   bash vm-spoofer.sh
+
+5. Seguir el asistente gráfico (whiptail, 8 pasos)
+
+   [1/8] Seleccionar VM
+         Detecta automáticamente tus VMs de VirtualBox.
+         Muestra SO, RAM, CPUs y estado de cada una.
+         Si la VM está encendida, guardada o bloqueada,
+         el script la prepara automáticamente.
+
+   [2/8] Fabricante
+         Menú con todos los perfiles disponibles:
+         Lenovo (ThinkPad, IdeaPad, Yoga), Dell (XPS,
+         Latitude, Inspiron, Precision), HP (EliteBook,
+         Spectre, Pavilion, ProBook, OMEN), ASUS (ZenBook,
+         VivoBook, ROG, TUF), Apple (MacBook Pro/Air, iMac,
+         Mac Mini, Mac Studio), Acer (Aspire, Nitro, Swift),
+         Microsoft Surface, MSI, Samsung, Huawei, Razer,
+         Framework, PC sobremesa genérico.
+
+   [3/8] Procesador
+         Intel i3 a i9, Intel Ultra (Meteor/Arrow Lake),
+         AMD Ryzen 5-9 (Zen4/Zen5), Ryzen AI,
+         Apple M1 a M4 Pro.
+
+   [4/8] RAM y CPUs
+         Puedes asignar MÁS RAM de la que tiene la VM.
+         El SO invitado verá la cantidad que elijas.
+
+   [5/8] Disco, GPU y Red
+         a) Disco: Samsung (860-990), WD (SN580-SN7100),
+            Kingston, Crucial (P5/T700), Seagate, SK Hynix,
+            Intel, Toshiba, Apple SSD.
+         b) GPU: Intel (UHD, Iris, Arc A/B), AMD (Radeon,
+            RX 7000-9000), NVIDIA (RTX 3000-5000, GTX),
+            Apple M1-M4 GPU.
+         c) Red: Generador de MAC con 3 opciones:
+            - Auto: genera aleatoria con prefijo del fabricante
+            - Manual: escribes la MAC que quieras
+            - Random: regenera otra con el mismo prefijo
+            Fabricantes: Intel (AX200-BE200), Realtek,
+            Broadcom, Qualcomm, MediaTek, Killer, Apple.
+
+   [6/8] Chipset PCI
+         Cambia TODOS los dispositivos PCI de la VM:
+         Intel 12th-14th Gen, Meteor Lake, Arrow Lake,
+         AMD Zen4/Zen5, Apple Intel, Apple Silicon.
+
+   [7/8] Dispositivos USB
+         Detecta cámaras, micrófonos y altavoces del host.
+         Preselecciona automáticamente los de audio/video.
+         Los que selecciones se conectan cada vez que
+         arranca la VM.
+
+   [8/8] Confirmar y aplicar
+         Muestra resumen completo. Confirmar con OK.
+
+5. Post-instalación (solo si la VM es Linux)
+   Dentro de la VM ejecutar:
+     bash post-install-linux.sh
+   Esto camufla lspci y bloquea módulos de VirtualBox.
+
+6. Verificar el camuflaje (dentro de la VM)
+
+   La verificación se hace con la librería systeminformation
+   de Node.js. Es la referencia que usan la mayoría de apps
+   para detectar máquinas virtuales.
+
+   Repositorio: https://github.com/sebhildebrandt/systeminformation
+   Librería open source de Node.js para consultar hardware.
+
+   OPCIÓN A: Verificar con Node.js (recomendado)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   a) Instalar Node.js en la VM (si no lo tienes):
+
+      Ubuntu/Debian:
+        sudo apt update && sudo apt install -y nodejs npm
+
+      Fedora:
+        sudo dnf install -y nodejs npm
+
+      Arch:
+        sudo pacman -S nodejs npm
+
+      O versión reciente desde NodeSource:
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        sudo apt install -y nodejs
+
+   b) Crear carpeta y copiar check.js:
+      mkdir ~/vm-verify && cd ~/vm-verify
+      (copiar check.js a esta carpeta)
+
+   c) Instalar la librería:
+      npm install systeminformation
+
+   d) Ejecutar la verificación:
+      sudo node check.js
+
+      (sudo es necesario para acceder a toda la info DMI)
+
+   e) Resultado esperado:
+      - system.virtual:      false  (NO detectada como VM)
+      - system.virtualHost:  vacío  (sin rastro de hipervisor)
+      - system.virtualVendor: vacío (sin VirtualBox/VMware)
+      - Fabricante:           (el que elegiste, ej: LENOVO)
+      - Disco:                (el que elegiste, ej: Samsung 990 PRO)
+      - lspci:                (Intel/AMD real, sin VMware/VirtualBox)
+
+   Si system.virtual sale "true", algo falló. Revisa que
+   aplicaste el camuflaje con la VM apagada y ejecutaste
+   el post-install-linux.sh dentro de la VM.
+
+
+   OPCIÓN B: Verificar con comandos del sistema (sin instalar nada)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Dentro de la VM Linux:
+
+   # Fabricante y modelo
+   sudo dmidecode -s system-manufacturer
+   sudo dmidecode -s system-product-name
+   cat /sys/class/dmi/id/sys_vendor
+
+   # BIOS
+   sudo dmidecode -s bios-vendor
+
+   # Disco
+   cat /sys/block/sda/device/model
+
+   # Dispositivos PCI (GPU, red, chipset)
+   lspci
+
+   # MAC
+   ip link show | grep ether
+
+   Todos deben mostrar el hardware que elegiste,
+   NO "VirtualBox", "Oracle", "VMware" ni "VBOX HARDDISK".
+
+
+   QUÉ INDICADORES SE COMPRUEBAN
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Indicador              Fuente                    Fiabilidad
+   ---------------------------------------------------------------
+   system.virtual         BIOS/DMI                  Alta
+   system.virtualVendor   BIOS/DMI                  Alta
+   system.virtualHost     BIOS/DMI                  Alta
+   diskLayout.name        Disco                     Media
+   diskLayout.vendor      Disco                     Media
+   graphics.vendor        lspci / GPU               Media
+   networkInterfaces.mac  Prefijo MAC               Media
+   lspci devices          Dispositivos PCI          Media
+   Combinación de todo    Múltiples fuentes         Muy Alta
+
+
+PREGUNTAS FRECUENTES
+--------------------
+P: La VM tiene que estar apagada?
+R: No. El script la apaga solo si hace falta.
+
+P: Pierdo datos si aplico el camuflaje?
+R: No. Solo cambia metadatos, no afecta a los archivos.
+
+P: Puedo revertir los cambios?
+R: Sí. El script guarda un backup automático antes de
+   aplicar cambios. Ejecuta el script de nuevo y elige
+   "Restaurar una VM" para volver a la configuración
+   original. Los backups se guardan en la carpeta backups/.
+
+P: Funciona con VMware?
+R: No. Solo VirtualBox.
+
+P: Por qué hay un paso de post-instalación para Linux?
+R: Porque lspci lee directamente del hardware PCI, no
+   del DMI. El post-install crea un wrapper que cambia
+   los nombres VMware/VirtualBox por los del chipset
+   que elegiste. También bloquea módulos del kernel
+   que delatan la VM (vboxguest, vboxsf, etc.).
+
+P: En Windows no hace falta post-instalación?
+R: No. Windows lee del DMI que ya está cambiado.
+   systeminformation no mira lspci en Windows.
+
+============================================
