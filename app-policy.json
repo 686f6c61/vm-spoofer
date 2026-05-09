@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "mode": "denylist",
+  "defaultDecision": "allowed",
+  "description": "Application policy used by OK VM Proctoring validation. Entries in banned-programs.json are blocking matches. Applications not matching that catalog are allowed unless a separate customer rule is provided.",
+  "inputs": {
+    "processInventory": "systeminformation.processes()",
+    "denylistCatalog": "banned-programs.json"
+  },
+  "decisions": [
+    {
+      "id": "banned-programs-catalog-match",
+      "decision": "blocked",
+      "source": "banned-programs.json",
+      "appliesWhen": "A running process name, process token, command, path token or macOS .app name matches a normalized catalog entry."
+    },
+    {
+      "id": "no-catalog-match",
+      "decision": "allowed",
+      "source": "defaultDecision",
+      "appliesWhen": "No normalized process candidate matches banned-programs.json."
+    },
+    {
+      "id": "guest-additions-processes",
+      "decision": "allowed_for_ok_vm_proctoring",
+      "source": "desktop_usability_requirement",
+      "appliesWhen": "Guest Additions processes are visible but are not present in banned-programs.json. They remain allowed because desktop usability requires Guest Additions."
+    },
+    {
+      "id": "advanced-vm-residuals",
+      "decision": "out_of_scope",
+      "source": "OK_VM_PROCTORING.md",
+      "appliesWhen": "A detector checks raw PCI IDs, ACPI internals, CPUID, timing artifacts, Guest Additions files, drivers or services instead of the agreed systeminformation/process/hook scope."
+    }
+  ],
+  "platforms": ["windows", "macos", "linux"],
+  "validationCommands": [
+    "node check.js --banned-programs banned-programs.json --banned-platform auto",
+    "node process-watch.js --banned-programs banned-programs.json --banned-platform auto --duration 60 --interval 2"
+  ]
+}

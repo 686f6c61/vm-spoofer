@@ -16,12 +16,16 @@ REQUISITOS
     Descargar desde https://www.virtualbox.org
   - PowerShell: el terminal de Windows. Viene incluido en
     Windows 10 y 11, no hay que instalar nada.
+  - Node.js: necesario para el menu principal, verificadores
+    y generacion de informes.
+    Descargar desde https://nodejs.org
   - Una VM ya creada en VirtualBox (Windows o Linux)
-  - Los archivos: vm-spoofer.ps1, hardware-db.json, check.js
+  - Los archivos: start.ps1, launcher.js, vm-spoofer.ps1,
+    hardware-db.json, check.js
 
-  No se necesitan dependencias adicionales en Windows.
-  El script usa PowerShell (incluido en el sistema) y
-  VBoxManage (incluido con VirtualBox).
+  El asistente tecnico usa PowerShell (incluido en el sistema)
+  y VBoxManage (incluido con VirtualBox). El menu principal y
+  los verificadores usan Node.js.
 
 
 CÓMO USAR
@@ -35,6 +39,20 @@ CÓMO USAR
    cd ruta\a\vm-creator
 
 3. Ejecutar
+   powershell -ExecutionPolicy Bypass -File start.ps1
+
+   Desde ese menu puedes:
+     [1] Elegir sistema aparente y preparar VM
+     [2] Verificar systeminformation
+     [3] Validar software abierto contra bannedPrograms
+     [4] Validar hooks de teclado/raton
+     [5] Generar informe OK VM Proctoring
+     [6] Conectar webcam a una VM arrancada
+     [7] Fuera de alcance proctoring: diagnostico avanzado
+     [8] Fuera de alcance proctoring: herramientas estrictas
+     [9] Ver rutas de documentacion
+
+   Si quieres abrir directamente el asistente tecnico:
    powershell -ExecutionPolicy Bypass -File vm-spoofer.ps1
 
 4. Seguir el asistente (8 pasos)
@@ -68,12 +86,15 @@ CÓMO USAR
             auto, manual o regenerar.
 
    [6/8] Chipset PCI
-         Plantilla que cambia todos los dispositivos PCI:
+         Plantilla de referencia para coherencia del perfil.
+         Windows no usa lspci como Linux; la verificación principal
+         se hace por DMI/SMBIOS, disco y red:
          Intel 12th-14th Gen, Meteor Lake, Arrow Lake,
          AMD Zen4/Zen5, Apple Intel, Apple Silicon.
 
-   [7/8] Dispositivos USB
-         Detecta cámaras, micrófonos y altavoces conectados.
+   [7/8] Periféricos
+         Audio y micro se activan con VirtualBox audio-in/audio-out.
+         USB queda como opción manual para webcam o dispositivo externo.
          Los que selecciones se conectarán automáticamente
          cada vez que arranques la VM.
 
@@ -106,20 +127,57 @@ CÓMO USAR
       (copiar check.js a esta carpeta)
 
    c) Instalar la librería:
-      npm install systeminformation
+      npm install systeminformation@5.31.6
 
    d) Ejecutar la verificación:
       node check.js
 
-   e) Resultado esperado:
-      - system.virtual:      false  (NO detectada como VM)
-      - system.virtualHost:  vacío  (sin rastro de hipervisor)
-      - system.virtualVendor: vacío (sin VirtualBox/VMware)
-      - Fabricante:           (el que elegiste, ej: Dell Inc.)
-      - Disco:                (el que elegiste, ej: Samsung 990 PRO)
+      Fuera de alcance proctoring, para diagnostico avanzado:
+        node check.js --advanced
 
-   Si system.virtual sale "true", algo falló. Revisa que
-   aplicaste el camuflaje con la VM apagada.
+      El modo avanzado revisa WMI/CIM, PnP PCI IDs,
+      servicios, drivers, claves de desinstalación y
+      artefactos de Guest Additions.
+      Si tienes bannedPrograms, usa:
+        node check.js --banned-programs banned-programs.txt
+
+      Para validar abrir software dentro de la VM:
+        node process-watch.js --banned-programs banned-programs.txt --duration 60 --interval 2
+
+   e) Resultado esperado:
+      - [FINDINGS] sin indicadores comunes de VM
+      - Score: 0/100 en modo común
+      - Fabricante: (el que elegiste, ej: Dell Inc.)
+      - Disco: (el que elegiste, ej: Samsung 990 PRO)
+
+   Si aparecen findings de VirtualBox/Oracle/VMware/QEMU/KVM,
+   algo falló. Revisa que aplicaste el camuflaje con la VM apagada.
+
+   f) Si el detector usa hooks de teclado/ratón:
+      npm install uiohook-napi@1.5.5
+      node input-hook-check.js --provider uiohook-napi --duration 15
+
+      O para keyspy:
+      npm install keyspy@1.1.1
+      node input-hook-check.js --provider keyspy --duration 15
+
+      Ejecutar solo con consentimiento y en sesión de escritorio
+      interactiva. El script no guarda teclas ni texto, solo
+      contadores de eventos.
+
+   g) Generar bundle de validación:
+      node validation-runner.js --out validation-runs\windows-vm
+
+      Con bannedPrograms y watch dinamico:
+      node validation-runner.js --out validation-runs\windows-vm ^
+        --banned-programs banned-programs.txt ^
+        --run-process-watch --process-watch-duration 60
+
+      Con hooks:
+      node validation-runner.js --out validation-runs\windows-vm ^
+        --run-input-hooks --hook-provider keyspy --hook-duration 15 --yes
+
+      El bundle incluye metadata, salidas completas y summary.md.
 
 
    OPCIÓN B: Verificar con PowerShell (rápido, sin instalar nada)
@@ -173,6 +231,7 @@ R: Sí. El script guarda un backup automático antes de
    aplicar cambios. Ejecuta el script de nuevo y elige
    "Restaurar una VM" para volver a la configuración
    original. Los backups se guardan en la carpeta backups/.
+   También se guarda una copia .vbox cuando VirtualBox la expone.
 
 P: Funciona con VMware?
 R: No. Solo VirtualBox.

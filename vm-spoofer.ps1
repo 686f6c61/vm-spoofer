@@ -82,7 +82,57 @@ function Gen-MAC {
 function VBoxCmd {
     param([string[]]$CmdArgs)
     $output = & $VBox @CmdArgs 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        $joined = $CmdArgs -join " "
+        throw "VBoxManage fallo: $joined`n$output"
+    }
     return $output
+}
+
+function VBoxTry {
+    param([string[]]$CmdArgs)
+    & $VBox @CmdArgs 2>$null | Out-Null
+}
+
+function Normalize-MAC {
+    param([string]$Mac)
+    $clean = ($Mac -replace "[:\.\-]", "").ToUpper()
+    if ($clean -notmatch "^[0-9A-F]{12}$") {
+        throw "MAC invalida. Usa 12 caracteres hexadecimales, con o sin separadores."
+    }
+    return $clean
+}
+
+function Format-MAC {
+    param([string]$Mac)
+    $clean = Normalize-MAC -Mac $Mac
+    return "$($clean.Substring(0,2)):$($clean.Substring(2,2)):$($clean.Substring(4,2)):$($clean.Substring(6,2)):$($clean.Substring(8,2)):$($clean.Substring(10,2))"
+}
+
+function Remove-SpooferUSBFilters {
+    param([string]$VMName)
+    $info = VBoxCmd @("showvminfo", $VMName, "--machinereadable") | Out-String
+    $indexes = @()
+    foreach ($line in ($info -split "`n")) {
+        if ($line -match '^USBFilterName(\d+)="VM Spoofer -') {
+            $indexes += ([int]$Matches[1] - 1)
+        }
+    }
+    foreach ($idx in ($indexes | Sort-Object -Descending)) {
+        if ($idx -ge 0) {
+            VBoxTry @("usbfilter", "remove", "$idx", "--target", $VMName)
+        }
+    }
+}
+
+function Get-SafeFileName {
+    param([string]$Name)
+    $invalid = [System.IO.Path]::GetInvalidFileNameChars()
+    $safe = $Name
+    foreach ($char in $invalid) {
+        $safe = $safe.Replace([string]$char, "_")
+    }
+    return $safe
 }
 
 # =============================================================================
@@ -169,8 +219,8 @@ function Step-DetectVMs {
             }
             default {
                 Write-Host "[*] Estado: $st. Intentando preparar la VM..." -ForegroundColor Yellow
-                VBoxCmd @("controlvm", $selected.Name, "poweroff") 2>$null | Out-Null
-                VBoxCmd @("discardstate", $selected.Name) 2>$null | Out-Null
+                VBoxTry @("controlvm", $selected.Name, "poweroff")
+                VBoxTry @("discardstate", $selected.Name)
                 Start-Sleep 2
             }
         }
@@ -285,8 +335,13 @@ function Step-NIC {
     switch ($macChoice) {
         "auto" { $mac = $autoMac }
         "manual" {
-            $customMac = Read-Host "Escribe la MAC completa (12 caracteres hex, sin separadores)"
-            if ($customMac.Length -ge 12) { $mac = $customMac.Substring(0,12).ToUpper() }
+            $customMac = Read-Host "Escribe la MAC completa (con o sin separadores)"
+            try {
+                $mac = Normalize-MAC -Mac $customMac
+            } catch {
+                Write-Host "[!] $($_.Exception.Message)" -ForegroundColor Red
+                exit 1
+            }
         }
         "random" {
             do {
@@ -298,7 +353,8 @@ function Step-NIC {
         }
     }
 
-    $formatted = "$($mac.Substring(0,2)):$($mac.Substring(2,2)):$($mac.Substring(4,2)):$($mac.Substring(6,2)):$($mac.Substring(8,2)):$($mac.Substring(10,2))"
+    $mac = Normalize-MAC -Mac $mac
+    $formatted = Format-MAC -Mac $mac
     Write-Host "  MAC seleccionada: $formatted" -ForegroundColor Green
     return @{ Key = $selected; MAC = $mac }
 }
@@ -364,7 +420,9 @@ function Step-USB {
         Write-Host "  No se detectaron dispositivos de audio/video." -ForegroundColor Yellow
     } else {
         Write-Host ""
-        $answer = Read-Host "Conectar estos $($devices.Count) dispositivos a la VM? (s/n)"
+        Write-Host "  Fase 1 usa audio/micro con VirtualBox audio-in/audio-out." -ForegroundColor Gray
+        Write-Host "  Usa USB solo para una webcam o dispositivo externo que quieras capturar." -ForegroundColor Gray
+        $answer = Read-Host "Conectar estos $($devices.Count) dispositivos USB a la VM? (s/n)"
         if ($answer -ne "s") { $devices = @() }
     }
 
@@ -414,7 +472,7 @@ function Apply-Spoof {
 
     Write-Host ""
     Write-Host "[  5%] Ajustando RAM y CPUs..." -ForegroundColor Yellow
-    VBoxCmd @("modifyvm", $VMName, "--memory", $Resources.RAM, "--cpus", $Resources.CPUs, "--vram", "128", "--graphicscontroller", "vmsvga", "--accelerate3d", "on", "--paravirt-provider", "none", "--cpuid-portability-level", "0") | Out-Null
+    VBoxCmd @("modifyvm", $VMName, "--memory", $Resources.RAM, "--cpus", $Resources.CPUs, "--vram", "128", "--graphicscontroller", "vmsvga", "--accelerate3d", "on", "--paravirt-provider", "none", "--cpuid-portability-level", "0", "--audio-controller", "hda", "--audio-driver", "default", "--audio-enabled", "on", "--audio-in", "on", "--audio-out", "on", "--clipboard-mode", "bidirectional", "--drag-and-drop", "bidirectional") | Out-Null
 
     Write-Host "[ 10%] Configurando red..." -ForegroundColor Yellow
     VBoxCmd @("modifyvm", $VMName, "--macaddress1", $NicInfo.MAC) | Out-Null
@@ -473,11 +531,11 @@ function Apply-Spoof {
     VBoxCmd @("setextradata", $VMName, "VBoxInternal/Devices/ahci/0/Config/Port1/ModelNumber", "HL-DT-ST DVDRAM GU90N") | Out-Null
     VBoxCmd @("setextradata", $VMName, "VBoxInternal/Devices/ahci/0/Config/Port1/SerialNumber", (Gen-Serial "K8OD" 6)) | Out-Null
 
-    Write-Host "[ 80%] USB: $($USBDevices.Count) dispositivos..." -ForegroundColor Yellow
-    VBoxCmd @("modifyvm", $VMName, "--usb-xhci", "on") 2>$null | Out-Null
+    Write-Host "[ 80%] USB opcional: $($USBDevices.Count) dispositivos..." -ForegroundColor Yellow
+    VBoxTry @("modifyvm", $VMName, "--usb-xhci", "on")
     for ($i = 0; $i -lt $USBDevices.Count; $i++) {
         $dev = $USBDevices[$i]
-        VBoxCmd @("usbfilter", "add", "$i", "--target", $VMName, "--name", $dev.Name, "--vendorid", $dev.Vid, "--productid", $dev.Pid) 2>$null | Out-Null
+        VBoxTry @("usbfilter", "add", "$i", "--target", $VMName, "--name", "VM Spoofer - $($dev.Name)", "--vendorid", $dev.Vid, "--productid", $dev.Pid)
         Write-Host "    [+] $($dev.Name)" -ForegroundColor Green
     }
 
@@ -513,7 +571,8 @@ function Backup-VM {
 
     if (-not (Test-Path $BackupDir)) { New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null }
 
-    $backupFile = Join-Path $BackupDir "$VMName.backup.json"
+    $backupName = Get-SafeFileName -Name $VMName
+    $backupFile = Join-Path $BackupDir "$backupName.backup.json"
 
     # Solo guardar si NO existe un backup previo (el primero siempre es el original)
     if (Test-Path $backupFile) {
@@ -529,7 +588,27 @@ function Backup-VM {
     $cpus = if ($info -match 'cpus=(\d+)') { $Matches[1] } else { "2" }
     $mac = if ($info -match 'macaddress1="(.+?)"') { $Matches[1] } else { "" }
     $nic = if ($info -match 'nic1="(.+?)"') { $Matches[1] } else { "nat" }
+    $bridge = if ($info -match 'bridgeadapter1="(.*?)"') { $Matches[1] } else { "" }
     $vram = if ($info -match 'vram=(\d+)') { $Matches[1] } else { "128" }
+    $graphics = if ($info -match 'graphicscontroller="(.+?)"') { $Matches[1] } else { "" }
+    $accelerate3d = if ($info -match 'accelerate3d="(.+?)"') { $Matches[1] } else { "" }
+    $paravirt = if ($info -match 'paravirtprovider="(.+?)"') { $Matches[1] } else { "" }
+    $audioDriver = if ($info -match 'audio="(.+?)"') { $Matches[1] } else { "" }
+    $audioOut = if ($info -match 'audio_out="(.+?)"') { $Matches[1] } else { "" }
+    $audioIn = if ($info -match 'audio_in="(.+?)"') { $Matches[1] } else { "" }
+    $clipboard = if ($info -match 'clipboard="(.+?)"') { $Matches[1] } else { "" }
+    $dragAndDrop = if ($info -match 'draganddrop="(.+?)"') { $Matches[1] } else { "" }
+    $xhci = if ($info -match 'xhci="(.+?)"') { $Matches[1] } else { "" }
+    $vrde = if ($info -match 'vrde="(.+?)"') { $Matches[1] } else { "" }
+    $vrdeport = if ($info -match 'vrdeport="?(.*?)"?(\r?\n|$)') { $Matches[1] } else { "" }
+    $vrdeaddress = if ($info -match 'vrdeaddress="(.*?)"') { $Matches[1] } else { "" }
+    $vrdeauthtype = if ($info -match 'vrdeauthtype="(.+?)"') { $Matches[1] } else { "" }
+    $cfgFile = if ($info -match 'CfgFile="(.+?)"') { $Matches[1] } else { "" }
+    $cfgBackup = ""
+    if ($cfgFile -and (Test-Path $cfgFile)) {
+        $cfgBackup = Join-Path $BackupDir "$backupName.original.vbox"
+        Copy-Item -Path $cfgFile -Destination $cfgBackup -Force
+    }
 
     # Leer extradata actual
     $extradata = @{}
@@ -544,12 +623,28 @@ function Backup-VM {
     $backup = @{
         vm_name = $VMName
         date = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+        config_file = $cfgFile
+        config_backup = $cfgBackup
         config = @{
             memory = $memory
             cpus = $cpus
             macaddress1 = $mac
             nic1 = $nic
+            bridgeadapter1 = $bridge
             vram = $vram
+            graphicscontroller = $graphics
+            accelerate3d = $accelerate3d
+            paravirtprovider = $paravirt
+            audiodriver = $audioDriver
+            audioout = $audioOut
+            audioin = $audioIn
+            clipboard = $clipboard
+            draganddrop = $dragAndDrop
+            xhci = $xhci
+            vrde = $vrde
+            vrdeport = $vrdeport
+            vrdeaddress = $vrdeaddress
+            vrdeauthtype = $vrdeauthtype
         }
         extradata = $extradata
     }
@@ -604,8 +699,8 @@ function Restore-VM {
     $state = if ($vmInfo -match 'VMState="(.+?)"') { $Matches[1] } else { "?" }
     if ($state -ne "poweroff") {
         Write-Host "[*] Apagando VM..." -ForegroundColor Yellow
-        VBoxCmd @("controlvm", $VMName, "poweroff") 2>$null | Out-Null
-        VBoxCmd @("discardstate", $VMName) 2>$null | Out-Null
+        VBoxTry @("controlvm", $VMName, "poweroff")
+        VBoxTry @("discardstate", $VMName)
         Start-Sleep 3
     }
 
@@ -614,18 +709,36 @@ function Restore-VM {
     Write-Host ""
 
     # Restaurar configuracion basica
-    Write-Host "[ 20%] Restaurando RAM, CPUs, MAC..." -ForegroundColor Yellow
-    VBoxCmd @("modifyvm", $VMName, "--memory", $data.config.memory, "--cpus", $data.config.cpus, "--vram", $data.config.vram) | Out-Null
+    Write-Host "[ 20%] Restaurando recursos, red, graficos y acceso remoto..." -ForegroundColor Yellow
+    VBoxTry @("modifyvm", $VMName, "--memory", $data.config.memory, "--cpus", $data.config.cpus, "--vram", $data.config.vram)
     if ($data.config.macaddress1) {
-        VBoxCmd @("modifyvm", $VMName, "--macaddress1", $data.config.macaddress1) | Out-Null
+        VBoxTry @("modifyvm", $VMName, "--macaddress1", $data.config.macaddress1)
     }
+    if ($data.config.nic1) { VBoxTry @("modifyvm", $VMName, "--nic1", $data.config.nic1) }
+    if ($data.config.nic1 -eq "bridged" -and $data.config.bridgeadapter1) {
+        VBoxTry @("modifyvm", $VMName, "--bridgeadapter1", $data.config.bridgeadapter1)
+    }
+    if ($data.config.graphicscontroller) { VBoxTry @("modifyvm", $VMName, "--graphicscontroller", $data.config.graphicscontroller) }
+    if ($data.config.accelerate3d) { VBoxTry @("modifyvm", $VMName, "--accelerate3d", $data.config.accelerate3d) }
+    if ($data.config.paravirtprovider) { VBoxTry @("modifyvm", $VMName, "--paravirt-provider", $data.config.paravirtprovider) }
+    if ($data.config.audiodriver) { VBoxTry @("modifyvm", $VMName, "--audio-driver", $data.config.audiodriver) }
+    if ($data.config.audioout) { VBoxTry @("modifyvm", $VMName, "--audio-out", $data.config.audioout) }
+    if ($data.config.audioin) { VBoxTry @("modifyvm", $VMName, "--audio-in", $data.config.audioin) }
+    if ($data.config.clipboard) { VBoxTry @("modifyvm", $VMName, "--clipboard-mode", $data.config.clipboard) }
+    if ($data.config.draganddrop) { VBoxTry @("modifyvm", $VMName, "--drag-and-drop", $data.config.draganddrop) }
+    if ($data.config.xhci) { VBoxTry @("modifyvm", $VMName, "--usb-xhci", $data.config.xhci) }
+    if ($data.config.vrde) { VBoxTry @("modifyvm", $VMName, "--vrde", $data.config.vrde) }
+    if ($data.config.vrdeport) { VBoxTry @("modifyvm", $VMName, "--vrde-port", $data.config.vrdeport) }
+    if ($data.config.vrdeaddress) { VBoxTry @("modifyvm", $VMName, "--vrde-address", $data.config.vrdeaddress) }
+    if ($data.config.vrdeauthtype) { VBoxTry @("modifyvm", $VMName, "--vrde-auth-type", $data.config.vrdeauthtype) }
+    Remove-SpooferUSBFilters -VMName $VMName
 
     # Borrar todos los extradata actuales de camuflaje
     Write-Host "[ 50%] Limpiando camuflaje actual..." -ForegroundColor Yellow
     $currentExtra = VBoxCmd @("getextradata", $VMName, "enumerate")
     foreach ($line in $currentExtra) {
         if ($line -match 'Key:\s+(VBoxInternal/.+?),') {
-            VBoxCmd @("setextradata", $VMName, $Matches[1]) | Out-Null
+            VBoxTry @("setextradata", $VMName, $Matches[1])
         }
     }
 
@@ -634,7 +747,7 @@ function Restore-VM {
     foreach ($key in $data.extradata.PSObject.Properties.Name) {
         $value = $data.extradata.$key
         if ($value) {
-            VBoxCmd @("setextradata", $VMName, $key, $value) | Out-Null
+            VBoxTry @("setextradata", $VMName, $key, $value)
         }
     }
 

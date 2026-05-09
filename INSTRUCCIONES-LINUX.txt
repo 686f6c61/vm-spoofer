@@ -24,11 +24,15 @@ REQUISITOS
     ejecutar el script). Suele venir preinstalado en la
     mayoría de distribuciones Linux.
     Instalar: sudo apt install whiptail
+  - Node.js y npm: necesarios para el menu principal,
+    verificadores y generacion de informes.
+    Instalar: sudo apt install nodejs npm
   - Una VM ya creada en VirtualBox (Windows o Linux)
-  - Los archivos: vm-spoofer.sh, hardware-db.json, check.js
+  - Los archivos: start.sh, launcher.js, vm-spoofer.sh,
+    hardware-db.json, check.js
 
   Instalar todo de golpe:
-    sudo apt install virtualbox jq whiptail
+    sudo apt install virtualbox jq whiptail nodejs npm
 
 
 CÓMO USAR
@@ -40,12 +44,23 @@ CÓMO USAR
    cd ruta/a/vm-creator
 
 3. Dar permisos de ejecución (solo la primera vez)
-   chmod +x vm-spoofer.sh
+   chmod +x start.sh vm-spoofer.sh
 
-4. Ejecutar
-   ./vm-spoofer.sh
+4. Ejecutar el menu principal
+   ./start.sh
 
-   O si prefieres sin dar permisos:
+   Desde ese menu puedes:
+     [1] Elegir sistema aparente y preparar VM
+     [2] Verificar systeminformation
+     [3] Validar software abierto contra bannedPrograms
+     [4] Validar hooks de teclado/raton
+     [5] Generar informe OK VM Proctoring
+     [6] Conectar webcam a una VM arrancada
+     [7] Fuera de alcance proctoring: diagnostico avanzado
+     [8] Fuera de alcance proctoring: herramientas estrictas
+     [9] Ver rutas de documentacion
+
+   O si quieres abrir directamente el asistente tecnico:
    bash vm-spoofer.sh
 
 5. Seguir el asistente gráfico (whiptail, 8 pasos)
@@ -94,19 +109,25 @@ CÓMO USAR
          Intel 12th-14th Gen, Meteor Lake, Arrow Lake,
          AMD Zen4/Zen5, Apple Intel, Apple Silicon.
 
-   [7/8] Dispositivos USB
-         Detecta cámaras, micrófonos y altavoces del host.
-         Preselecciona automáticamente los de audio/video.
-         Los que selecciones se conectan cada vez que
-         arranca la VM.
+   [7/8] Periféricos
+         Audio y micro se activan con VirtualBox audio-in/audio-out.
+         Los USB externos son opcionales y no se seleccionan
+         automáticamente. Usa USB solo para una webcam o
+         dispositivo concreto que quieras capturar.
 
-   [8/8] Confirmar y aplicar
+   [8/8] Red y acceso remoto
+         Elige NAT, puente o mantener la red actual.
+         VRDE/RDP queda desactivado por defecto. Si lo activas,
+         solo escucha en 127.0.0.1 y en el puerto elegido.
+
+   [Resumen] Confirmar y aplicar
          Muestra resumen completo. Confirmar con OK.
 
-5. Post-instalación (solo si la VM es Linux)
+5. Post-instalación OK VM Proctoring (solo si la VM es Linux)
    Dentro de la VM ejecutar:
      bash post-install-linux.sh
-   Esto camufla lspci y bloquea módulos de VirtualBox.
+   Esto camufla lspci sin bloquear ni desinstalar Guest Additions.
+   El script no instala ni activa SSH automáticamente.
 
 6. Verificar el camuflaje (dentro de la VM)
 
@@ -140,24 +161,62 @@ CÓMO USAR
       (copiar check.js a esta carpeta)
 
    c) Instalar la librería:
-      npm install systeminformation
+      npm install systeminformation@5.31.6
 
    d) Ejecutar la verificación:
       sudo node check.js
 
       (sudo es necesario para acceder a toda la info DMI)
 
-   e) Resultado esperado:
-      - system.virtual:      false  (NO detectada como VM)
-      - system.virtualHost:  vacío  (sin rastro de hipervisor)
-      - system.virtualVendor: vacío (sin VirtualBox/VMware)
-      - Fabricante:           (el que elegiste, ej: LENOVO)
-      - Disco:                (el que elegiste, ej: Samsung 990 PRO)
-      - lspci:                (Intel/AMD real, sin VMware/VirtualBox)
+      Si tienes la lista bannedPrograms del cliente:
+        sudo node check.js --banned-programs banned-programs.txt
 
-   Si system.virtual sale "true", algo falló. Revisa que
-   aplicaste el camuflaje con la VM apagada y ejecutaste
-   el post-install-linux.sh dentro de la VM.
+      Para validar abrir software dentro de la VM:
+        node process-watch.js --banned-programs banned-programs.txt --duration 60 --interval 2
+
+      Fuera de alcance proctoring, para diagnostico avanzado:
+        sudo node check.js --advanced
+
+      El modo avanzado es diagnóstico fuera de OK VM Proctoring. Revisa CPUID visible desde Linux,
+      PCI vendor IDs reales en /sys, módulos, servicios,
+      paquetes, artefactos de Guest Additions, ACPI y logs.
+
+   e) Resultado esperado:
+      - [FINDINGS] sin indicadores comunes de VM
+      - Score: 0/100 en modo común
+      - Fabricante: (el que elegiste, ej: LENOVO)
+      - Disco: (el que elegiste, ej: Samsung 990 PRO)
+      - system.virtual: false
+      - lspci visible: Intel/AMD real, sin VMware/VirtualBox
+
+      Si aparecen findings de VirtualBox/Oracle/VMware/QEMU/KVM,
+      algo falló. Revisa que aplicaste el camuflaje con la VM
+      apagada y ejecutaste el post-install-linux.sh dentro de la VM.
+
+   f) Si el detector usa hooks de teclado/ratón:
+      npm install uiohook-napi@1.5.5
+      node input-hook-check.js --provider uiohook-napi --duration 15
+
+      O para keyspy:
+      npm install keyspy@1.1.1
+      node input-hook-check.js --provider keyspy --duration 15
+
+      Ejecutar solo con consentimiento y en sesión gráfica interactiva.
+      El script no guarda teclas ni texto, solo contadores de eventos.
+
+   g) Generar bundle de validación:
+      node validation-runner.js --out validation-runs/linux-vm
+
+      Con bannedPrograms y watch dinámico:
+      node validation-runner.js --out validation-runs/linux-vm \
+        --banned-programs banned-programs.txt \
+        --run-process-watch --process-watch-duration 60
+
+      Con hooks:
+      node validation-runner.js --out validation-runs/linux-vm \
+        --run-input-hooks --hook-provider keyspy --hook-duration 15 --yes
+
+      El bundle incluye metadata, salidas completas y summary.md.
 
 
    OPCIÓN B: Verificar con comandos del sistema (sin instalar nada)
@@ -214,6 +273,7 @@ R: Sí. El script guarda un backup automático antes de
    aplicar cambios. Ejecuta el script de nuevo y elige
    "Restaurar una VM" para volver a la configuración
    original. Los backups se guardan en la carpeta backups/.
+   También se guarda una copia .vbox cuando VirtualBox la expone.
 
 P: Funciona con VMware?
 R: No. Solo VirtualBox.
@@ -222,8 +282,8 @@ P: Por qué hay un paso de post-instalación para Linux?
 R: Porque lspci lee directamente del hardware PCI, no
    del DMI. El post-install crea un wrapper que cambia
    los nombres VMware/VirtualBox por los del chipset
-   que elegiste. También bloquea módulos del kernel
-   que delatan la VM (vboxguest, vboxsf, etc.).
+   que elegiste. En OK VM Proctoring no bloquea módulos del kernel
+   de VirtualBox porque Guest Additions deben funcionar.
 
 P: En Windows no hace falta post-instalación?
 R: No. Windows lee del DMI que ya está cambiado.

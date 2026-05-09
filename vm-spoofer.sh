@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2001,SC2034,SC2086,SC2155
 # =============================================================================
 # VM Spoofer - Camufla una maquina virtual existente
 #
@@ -90,6 +91,79 @@ gen_serial() {
 gen_mac_suffix() { printf '%02X:%02X:%02X' $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)); }
 
 gen_uuid() { cat /proc/sys/kernel/random/uuid 2>/dev/null || python3 -c "import uuid; print(uuid.uuid4())"; }
+
+die() {
+  echo -e "${RED}[!] $*${NC}" >&2
+  exit 1
+}
+
+vbox_run() {
+  local output
+  if ! output=$(VBoxManage "$@" 2>&1); then
+    echo -e "${RED}[!] VBoxManage fallo: $*${NC}" >&2
+    [ -n "$output" ] && echo "$output" >&2
+    exit 1
+  fi
+  [ -n "$output" ] && printf '%s\n' "$output"
+}
+
+vbox_try() {
+  VBoxManage "$@" >/dev/null 2>&1 || true
+}
+
+mr_value() {
+  local info="$1" key="$2"
+  printf '%s\n' "$info" | awk -F= -v key="$key" '
+    $1 == key {
+      value = $2
+      sub(/^"/, "", value)
+      sub(/"$/, "", value)
+      print value
+      exit
+    }'
+}
+
+normalize_mac() {
+  local mac="${1//[:.-]/}"
+  mac="${mac^^}"
+  [[ "$mac" =~ ^[0-9A-F]{12}$ ]] || return 1
+  printf '%s' "$mac"
+}
+
+format_mac() {
+  local mac
+  mac=$(normalize_mac "$1") || return 1
+  printf '%s:%s:%s:%s:%s:%s' \
+    "${mac:0:2}" "${mac:2:2}" "${mac:4:2}" "${mac:6:2}" "${mac:8:2}" "${mac:10:2}"
+}
+
+escape_sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[\/&\\]/\\&/g'
+}
+
+safe_filename() {
+  printf '%s' "$1" | sed 's#[/\\:*?"<>|]#_#g'
+}
+
+detect_dmi_path() {
+  local vm_name="$1" fw
+  fw=$(VBoxManage showvminfo "$vm_name" --machinereadable 2>/dev/null | grep "^firmware=" | cut -d'"' -f2)
+  if echo "$fw" | grep -qi "efi"; then
+    echo "VBoxInternal/Devices/efi/0/Config"
+  else
+    echo "VBoxInternal/Devices/pcbios/0/Config"
+  fi
+}
+
+remove_spoofer_usb_filters() {
+  local vm_name="$1" info idx remove_idx
+  info=$(VBoxManage showvminfo "$vm_name" --machinereadable 2>/dev/null || true)
+  while IFS= read -r idx; do
+    [ -z "$idx" ] && continue
+    remove_idx=$((idx - 1))
+    [ "$remove_idx" -ge 0 ] && vbox_try usbfilter remove "$remove_idx" --target "$vm_name"
+  done < <(echo "$info" | sed -n 's/^USBFilterName\([0-9]\+\)="VM Spoofer -.*/\1/p' | sort -rn)
+}
 
 # =============================================================================
 # PASO 1: Detectar VMs existentes
@@ -309,7 +383,11 @@ step_peripherals() {
       ;;
   esac
 
-  NIC_MAC_NOCOLON=$(echo "$NIC_MAC" | tr -d ':')
+  if ! NIC_MAC_NOCOLON=$(normalize_mac "$NIC_MAC"); then
+    wt_msg "MAC invalida" "La direccion MAC no es valida.\n\nUsa 12 caracteres hexadecimales, con o sin separadores.\nEjemplo: $auto_mac"
+    exit 1
+  fi
+  NIC_MAC=$(format_mac "$NIC_MAC_NOCOLON")
 }
 
 # =============================================================================
@@ -366,8 +444,6 @@ step_usb_devices() {
           esac
 
           local default="OFF"
-          # Preseleccionar camaras, micros y audio
-          [[ "$category" == "camara" || "$category" == "micro" || "$category" == "audio" ]] && default="ON"
 
           usb_items+=("$idx" "$icon $current_mfg $current_prod" "$default")
           usb_data+=("$current_vid|$current_pid|$current_mfg|$current_prod")
@@ -386,7 +462,7 @@ step_usb_devices() {
 
   # Mostrar checklist
   local selected=$(wt_checklist "Dispositivos USB" \
-    "Se han detectado $idx dispositivos USB.\nSelecciona los que quieres pasar a la VM.\n\nLos dispositivos marcados se conectaran\nautomaticamente cada vez que arranques la VM." \
+    "Se han detectado $idx dispositivos USB.\n\nFase 1 mantiene audio/micro con VirtualBox audio-in/audio-out.\nMarca solo una webcam o dispositivo externo que quieras capturar.\nNo se selecciona nada por defecto para evitar capturas USB inesperadas." \
     "${usb_items[@]}")
 
   USB_FILTERS=()
@@ -448,6 +524,21 @@ step_network_mode() {
     BRIDGE_IFACE=$(wt_menu "Interfaz de red" \
       "Interfaz del host para el puente:" "${ifaces[@]}")
   fi
+
+  REMOTE_MODE=$(wt_menu "Acceso remoto de VirtualBox" \
+    "VRDE/RDP da acceso a la consola de la VM desde el host.\nPor seguridad queda desactivado salvo que lo necesites." \
+    "off"   "Desactivado (recomendado)" \
+    "local" "Activar solo en 127.0.0.1 para acceso local")
+
+  VRDE_PORT="3389"
+  VRDE_ADDRESS="127.0.0.1"
+  if [ "$REMOTE_MODE" = "local" ]; then
+    VRDE_PORT=$(wt_input "Puerto VRDE" "Puerto local para conectar por RDP:" "$VRDE_PORT")
+    if ! [[ "$VRDE_PORT" =~ ^[0-9]{2,5}$ ]] || [ "$VRDE_PORT" -lt 1 ] || [ "$VRDE_PORT" -gt 65535 ]; then
+      wt_msg "Puerto invalido" "El puerto VRDE debe ser un numero entre 1 y 65535."
+      exit 1
+    fi
+  fi
 }
 
 # =============================================================================
@@ -479,6 +570,7 @@ HARDWARE SIMULADO
   Red:           $NIC_PCI_NAME
   Chipset:       $CHIPSET_CHOICE
   Red VM:        $NET_MODE
+  Acceso remoto: $REMOTE_MODE
 $usb_summary"
 
   wt_yesno "Resumen - Aplicar cambios?" "$summary" || exit 0
@@ -496,38 +588,52 @@ apply_changes() {
 
   # --- Recursos ---
   echo -e "${YELLOW}[  5%] Ajustando RAM y CPUs...${NC}"
-  VBoxManage modifyvm "$VM_NAME" \
+  vbox_run modifyvm "$VM_NAME" \
     --memory "$VM_RAM" \
     --cpus "$VM_CPUS" \
     --vram 128 \
     --graphicscontroller vmsvga \
     --accelerate3d on \
     --paravirt-provider none \
-    --cpuid-portability-level 0 >/dev/null 2>&1
+    --cpuid-portability-level 0 \
+    --audio-controller hda \
+    --audio-driver default \
+    --audio-enabled on \
+    --audio-in on \
+    --audio-out on \
+    --clipboard-mode bidirectional \
+    --drag-and-drop bidirectional >/dev/null
 
   # --- Red ---
   echo -e "${YELLOW}[ 10%] Configurando red...${NC}"
   if [ "$NET_MODE" = "bridged" ]; then
-    VBoxManage modifyvm "$VM_NAME" --nic1 bridged --bridgeadapter1 "$BRIDGE_IFACE" >/dev/null 2>&1
+    vbox_run modifyvm "$VM_NAME" --nic1 bridged --bridgeadapter1 "$BRIDGE_IFACE" >/dev/null
   elif [ "$NET_MODE" = "nat" ]; then
-    VBoxManage modifyvm "$VM_NAME" --nic1 nat >/dev/null 2>&1
+    vbox_run modifyvm "$VM_NAME" --nic1 nat >/dev/null
   fi
   if [ "$NET_MODE" != "keep" ]; then
-    VBoxManage modifyvm "$VM_NAME" --macaddress1 "$NIC_MAC_NOCOLON" >/dev/null 2>&1
+    vbox_run modifyvm "$VM_NAME" --macaddress1 "$NIC_MAC_NOCOLON" >/dev/null
   fi
 
   # --- VRDE ---
-  echo -e "${YELLOW}[ 15%] Configurando escritorio remoto...${NC}"
-  VBoxManage modifyvm "$VM_NAME" --vrde on --vrde-port 3389 --vrde-auth-type null >/dev/null 2>&1
-  VBoxManage modifyvm "$VM_NAME" --vrde-property "Security/Method=Negotiate" >/dev/null 2>&1
+  echo -e "${YELLOW}[ 15%] Configurando acceso remoto seguro...${NC}"
+  if [ "$REMOTE_MODE" = "local" ]; then
+    vbox_run modifyvm "$VM_NAME" --vrde on --vrde-address "$VRDE_ADDRESS" --vrde-port "$VRDE_PORT" --vrde-auth-type null >/dev/null
+    vbox_run modifyvm "$VM_NAME" --vrde-property "Security/Method=Negotiate" >/dev/null
+    echo -e "    ${GREEN}[OK] VRDE activo solo en $VRDE_ADDRESS:$VRDE_PORT${NC}"
+  else
+    vbox_run modifyvm "$VM_NAME" --vrde off >/dev/null
+    echo -e "    ${GREEN}[OK] VRDE desactivado${NC}"
+  fi
 
   # --- Ocultar VM ---
   echo -e "${YELLOW}[ 20%] Ocultando identificadores de VirtualBox...${NC}"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1"
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled" "1" >/dev/null
 
   # --- DMI: Sistema ---
   echo -e "${YELLOW}[ 30%] Aplicando perfil DMI: Sistema...${NC}"
-  local P="VBoxInternal/Devices/pcbios/0/Config"
+  local P
+  P=$(detect_dmi_path "$VM_NAME")
   local mfg=".manufacturers[\"$MFG_CHOICE\"]"
   local sys_serial=$(gen_serial "PF" 6)
 
@@ -535,60 +641,60 @@ apply_changes() {
   SYS_VENDOR=$(jq -r "$mfg.system.vendor" "$DB")
   SYS_PRODUCT=$(jq -r "$mfg.system.product" "$DB")
 
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemVendor"  "$SYS_VENDOR"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemProduct" "$SYS_PRODUCT"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemVersion" "$(jq -r "$mfg.system.version" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemSKU"     "$(jq -r "$mfg.system.sku" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemFamily"  "$(jq -r "$mfg.system.family" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemSerial"  "$sys_serial"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiSystemUuid"    "$(gen_uuid)"
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemVendor"  "$SYS_VENDOR" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemProduct" "$SYS_PRODUCT" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemVersion" "$(jq -r "$mfg.system.version" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemSKU"     "$(jq -r "$mfg.system.sku" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemFamily"  "$(jq -r "$mfg.system.family" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemSerial"  "$sys_serial" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiSystemUuid"    "$(gen_uuid)" >/dev/null
 
   # --- DMI: BIOS ---
   echo -e "${YELLOW}[ 40%] Aplicando perfil DMI: BIOS...${NC}"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSVendor"        "$(jq -r "$mfg.bios.vendor" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSVersion"       "$(jq -r "$mfg.bios.version" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSReleaseDate"   "$(jq -r "$mfg.bios.date" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSReleaseMajor"  "$(jq -r "$mfg.bios.major" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSReleaseMinor"  "$(jq -r "$mfg.bios.minor" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSFirmwareMajor" "$(jq -r "$mfg.bios.firmware_major" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBIOSFirmwareMinor" "$(jq -r "$mfg.bios.firmware_minor" "$DB")"
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSVendor"        "$(jq -r "$mfg.bios.vendor" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSVersion"       "$(jq -r "$mfg.bios.version" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSReleaseDate"   "$(jq -r "$mfg.bios.date" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSReleaseMajor"  "$(jq -r "$mfg.bios.major" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSReleaseMinor"  "$(jq -r "$mfg.bios.minor" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSFirmwareMajor" "$(jq -r "$mfg.bios.firmware_major" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBIOSFirmwareMinor" "$(jq -r "$mfg.bios.firmware_minor" "$DB")" >/dev/null
 
   # --- DMI: Placa base ---
   echo -e "${YELLOW}[ 50%] Aplicando perfil DMI: Placa base...${NC}"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBoardVendor"     "$(jq -r "$mfg.board.vendor" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBoardProduct"    "$(jq -r "$mfg.board.product" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBoardVersion"    "$(jq -r "$mfg.board.version" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBoardSerial"     "$(gen_serial 'L1HF' 7)"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBoardAssetTag"   "Not Available"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiBoardLocInChass" "Not Available"
+  vbox_run setextradata "$VM_NAME" "$P/DmiBoardVendor"     "$(jq -r "$mfg.board.vendor" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBoardProduct"    "$(jq -r "$mfg.board.product" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBoardVersion"    "$(jq -r "$mfg.board.version" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBoardSerial"     "$(gen_serial 'L1HF' 7)" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBoardAssetTag"   "Not Available" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiBoardLocInChass" "Not Available" >/dev/null
 
   # --- DMI: Chasis ---
   echo -e "${YELLOW}[ 55%] Aplicando perfil DMI: Chasis...${NC}"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiChassisVendor"   "$(jq -r "$mfg.chassis.vendor" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiChassisVersion"  "$(jq -r "$mfg.chassis.version" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiChassisSerial"   "$sys_serial"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiChassisAssetTag" "No Asset Information"
-  VBoxManage setextradata "$VM_NAME" "$P/DmiChassisType"     "$(jq -r "$mfg.chassis.type" "$DB")"
+  vbox_run setextradata "$VM_NAME" "$P/DmiChassisVendor"   "$(jq -r "$mfg.chassis.vendor" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiChassisVersion"  "$(jq -r "$mfg.chassis.version" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiChassisSerial"   "$sys_serial" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiChassisAssetTag" "No Asset Information" >/dev/null
+  vbox_run setextradata "$VM_NAME" "$P/DmiChassisType"     "$(jq -r "$mfg.chassis.type" "$DB")" >/dev/null
 
   # --- ACPI ---
   echo -e "${YELLOW}[ 60%] Aplicando ACPI...${NC}"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/acpi/0/Config/AcpiOemId"     "$(jq -r "$mfg.acpi.oem_id" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/acpi/0/Config/AcpiCreatorId"  "$(jq -r "$mfg.acpi.creator_id" "$DB")"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/acpi/0/Config/AcpiCreatorRev" "$(jq -r "$mfg.acpi.creator_rev" "$DB")"
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/acpi/0/Config/AcpiOemId"     "$(jq -r "$mfg.acpi.oem_id" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/acpi/0/Config/AcpiCreatorId"  "$(jq -r "$mfg.acpi.creator_id" "$DB")" >/dev/null
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/acpi/0/Config/AcpiCreatorRev" "$(jq -r "$mfg.acpi.creator_rev" "$DB")" >/dev/null
 
   # --- Disco ---
   echo -e "${YELLOW}[ 70%] Aplicando identidad del disco...${NC}"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port0/SerialNumber"     "$DISK_SERIAL"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port0/FirmwareRevision"  "$DISK_FW"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port0/ModelNumber"       "$DISK_MODEL"
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port0/SerialNumber"     "$DISK_SERIAL" >/dev/null
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port0/FirmwareRevision"  "$DISK_FW" >/dev/null
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port0/ModelNumber"       "$DISK_MODEL" >/dev/null
 
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port1/ModelNumber"       "HL-DT-ST DVDRAM GU90N"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port1/SerialNumber"      "$(gen_serial 'K8OD' 6)"
-  VBoxManage setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port1/FirmwareRevision"  "A101"
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port1/ModelNumber"       "HL-DT-ST DVDRAM GU90N" >/dev/null
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port1/SerialNumber"      "$(gen_serial 'K8OD' 6)" >/dev/null
+  vbox_run setextradata "$VM_NAME" "VBoxInternal/Devices/ahci/0/Config/Port1/FirmwareRevision"  "A101" >/dev/null
 
   # --- USB: Activar USB 3.0 y crear filtros ---
   echo -e "${YELLOW}[ 75%] Configurando dispositivos USB...${NC}"
-  VBoxManage modifyvm "$VM_NAME" --usb-xhci on >/dev/null 2>&1 || true
+  vbox_try modifyvm "$VM_NAME" --usb-xhci on
 
   if [ ${#USB_FILTERS[@]} -gt 0 ]; then
     local filter_idx=0
@@ -598,10 +704,10 @@ apply_changes() {
       local mfg=$(echo "$usb_entry" | cut -d'|' -f3)
       local prod=$(echo "$usb_entry" | cut -d'|' -f4)
 
-      VBoxManage usbfilter add "$filter_idx" --target "$VM_NAME" \
-        --name "$mfg $prod" \
+      vbox_try usbfilter add "$filter_idx" --target "$VM_NAME" \
+        --name "VM Spoofer - $mfg $prod" \
         --vendorid "$vid" \
-        --productid "$pid" >/dev/null 2>&1 || true
+        --productid "$pid"
 
       echo -e "    ${GREEN}[+] $prod ($mfg)${NC}"
       filter_idx=$((filter_idx + 1))
@@ -621,6 +727,14 @@ apply_changes() {
   local GUEST_SVC=$(jq -r "$LSPCI_TPL.guest_service" "$DB")
   local ACPI_BRIDGE=$(jq -r "$LSPCI_TPL.acpi_bridge" "$DB")
   local AUDIO_CTRL=$(jq -r "$LSPCI_TPL.audio" "$DB")
+  local GPU_PCI_NAME_SED=$(escape_sed_replacement "$GPU_PCI_NAME")
+  local GUEST_SVC_SED=$(escape_sed_replacement "$GUEST_SVC")
+  local HOST_BRIDGE_SED=$(escape_sed_replacement "$HOST_BRIDGE")
+  local ISA_BRIDGE_SED=$(escape_sed_replacement "$ISA_BRIDGE")
+  local IDE_CTRL_SED=$(escape_sed_replacement "$IDE_CTRL")
+  local ACPI_BRIDGE_SED=$(escape_sed_replacement "$ACPI_BRIDGE")
+  local AUDIO_CTRL_SED=$(escape_sed_replacement "$AUDIO_CTRL")
+  local NIC_PCI_NAME_SED=$(escape_sed_replacement "$NIC_PCI_NAME")
 
   # Script para ejecutar DENTRO de la VM (Linux)
   cat > "$SCRIPT_DIR/post-install-linux.sh" << POSTEOF
@@ -638,8 +752,8 @@ echo "  Completando camuflaje de la VM (Linux)"
 echo "============================================"
 echo ""
 
-# 1. Camuflar lspci
-echo "[1/4] Camuflando dispositivos PCI (lspci)..."
+# 1. Camuflar lspci sin tocar Guest Additions
+echo "[1/3] Camuflando dispositivos PCI visibles por lspci..."
 if [ ! -f /usr/bin/lspci.real ] && command -v lspci >/dev/null 2>&1; then
   sudo cp /usr/bin/lspci /usr/bin/lspci.real
 fi
@@ -647,42 +761,34 @@ fi
 sudo tee /usr/local/bin/lspci > /dev/null << 'LSPCI_SCRIPT'
 #!/bin/bash
 /usr/bin/lspci.real "\$@" | sed \\
-  -e "s/VMware SVGA II Adapter/$GPU_PCI_NAME/g" \\
-  -e "s/InnoTek Systemberatung GmbH VirtualBox Guest Service/$GUEST_SVC/g" \\
-  -e "s/Intel Corporation 440FX - 82441FX PMC \[Natoma\]/$HOST_BRIDGE/g" \\
-  -e "s/82371SB PIIX3 ISA \[Natoma\/Triton II\]/$ISA_BRIDGE/g" \\
-  -e "s/82371AB\/EB\/MB PIIX4 IDE/$IDE_CTRL/g" \\
-  -e "s/82371AB\/EB\/MB PIIX4 ACPI/$ACPI_BRIDGE/g" \\
-  -e "s/82801AA AC.97 Audio Controller/$AUDIO_CTRL/g" \\
-  -e "s/Intel Corporation 82540EM Gigabit Ethernet Controller/$NIC_PCI_NAME/g"
+  -e "s/VMware SVGA II Adapter/$GPU_PCI_NAME_SED/g" \\
+  -e "s/InnoTek Systemberatung GmbH VirtualBox Guest Service/$GUEST_SVC_SED/g" \\
+  -e "s/Intel Corporation 440FX - 82441FX PMC \[Natoma\]/$HOST_BRIDGE_SED/g" \\
+  -e "s/82371SB PIIX3 ISA \[Natoma\/Triton II\]/$ISA_BRIDGE_SED/g" \\
+  -e "s/82371AB\/EB\/MB PIIX4 IDE/$IDE_CTRL_SED/g" \\
+  -e "s/82371AB\/EB\/MB PIIX4 ACPI/$ACPI_BRIDGE_SED/g" \\
+  -e "s/82801AA AC.97 Audio Controller/$AUDIO_CTRL_SED/g" \\
+  -e "s/Intel Corporation 82540EM Gigabit Ethernet Controller/$NIC_PCI_NAME_SED/g"
 LSPCI_SCRIPT
 sudo chmod +x /usr/local/bin/lspci
 sudo ln -sf /usr/local/bin/lspci /usr/bin/lspci
 echo "    [OK] lspci camuflado"
 
-# 2. Bloquear modulos de VM
-echo "[2/4] Bloqueando modulos que delatan la VM..."
-sudo tee /etc/modprobe.d/blacklist-vm.conf > /dev/null << 'EOF'
-blacklist vboxguest
-blacklist vboxsf
-blacklist vboxvideo
-blacklist vmw_vmci
-blacklist vmw_vsock_vmci_transport
-blacklist vmwgfx
-EOF
-echo "    [OK] Modulos bloqueados"
-
-# 3. Hostname
-echo "[3/4] Configurando hostname..."
+# 2. Hostname
+echo "[2/3] Configurando hostname..."
 sudo hostnamectl set-hostname \$(cat /sys/class/dmi/id/product_family 2>/dev/null | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | head -c 30) 2>/dev/null || true
 echo "    [OK] Hostname actualizado"
 
-# 4. Instalar herramientas utiles
-echo "[4/4] Instalando herramientas..."
-sudo apt install -y openssh-server pciutils 2>/dev/null || true
-sudo systemctl enable ssh 2>/dev/null || true
-sudo systemctl start ssh 2>/dev/null || true
-echo "    [OK] SSH instalado"
+# 3. Instalar herramientas utiles minimas
+echo "[3/3] Verificando herramientas..."
+if ! command -v lspci >/dev/null 2>&1; then
+  sudo apt install -y pciutils 2>/dev/null || true
+fi
+echo "    [OK] pciutils disponible"
+echo "    [INFO] Perfil OK VM Proctoring: Guest Additions se mantienen intactas."
+echo "    [INFO] SSH no se instala ni se activa automaticamente."
+echo "           Si necesitas acceso remoto, instálalo de forma explícita:"
+echo "           sudo apt install -y openssh-server"
 
 echo ""
 echo "============================================"
@@ -766,12 +872,17 @@ WINEOF
   echo -e "  ${BOLD}Siguientes pasos:${NC}"
   echo ""
   echo -e "  ${CYAN}1. Arrancar la VM:${NC}"
-  echo -e "     VBoxManage startvm \"$VM_NAME\" --type headless"
+  echo -e "     VBoxManage startvm \"$VM_NAME\" --type gui"
   echo ""
 
   if [ "$is_windows" = true ]; then
-    echo -e "  ${CYAN}2. Conectarse por escritorio remoto (RDP):${NC}"
-    echo -e "     xfreerdp3 /v:127.0.0.1:3389 /sec:rdp /cert:ignore /u:\"\" /p:\"\" +clipboard"
+    if [ "$REMOTE_MODE" = "local" ]; then
+      echo -e "  ${CYAN}2. Conectarse por escritorio remoto local (VRDE):${NC}"
+      echo -e "     xfreerdp3 /v:127.0.0.1:$VRDE_PORT /sec:rdp /cert:ignore /u:\"\" /p:\"\" +clipboard"
+    else
+      echo -e "  ${CYAN}2. Conectarse a la VM:${NC}"
+      echo -e "     VRDE esta desactivado. Usa la consola de VirtualBox o el acceso remoto del SO invitado."
+    fi
     echo ""
     echo -e "  ${CYAN}3. Verificar dentro de Windows:${NC}"
     echo -e "     Abrir PowerShell y ejecutar:"
@@ -779,8 +890,12 @@ WINEOF
     echo ""
     echo -e "     O instalar Node.js + systeminformation (ver post-install-windows.txt)"
   else
-    echo -e "  ${CYAN}2. Copiar y ejecutar el script de post-instalacion:${NC}"
-    echo -e "     (sustituye USUARIO e IP por los de tu VM)"
+    echo -e "  ${CYAN}2. Post-instalacion Linux OK VM Proctoring:${NC}"
+    echo -e "     Opcional si systeminformation/lspci aun muestra GPU o chipset virtual."
+    echo -e "     No desinstala ni bloquea Guest Additions."
+    echo -e "     Opcion A: desde la consola de la VM, copia post-install-linux.sh y ejecuta:"
+    echo -e "     ${YELLOW}bash /tmp/post-install-linux.sh${NC}"
+    echo -e "     Opcion B: si la VM ya tiene SSH:"
     echo -e "     ${YELLOW}scp post-install-linux.sh USUARIO@IP:/tmp/${NC}"
     echo -e "     ${YELLOW}ssh USUARIO@IP 'bash /tmp/post-install-linux.sh'${NC}"
     echo ""
@@ -789,16 +904,17 @@ WINEOF
     echo -e "     ${YELLOW}ssh USUARIO@IP 'bash /tmp/verify-vm.sh'${NC}"
   fi
 
-  echo ""
-  echo -e "  ${CYAN}Conexion desde Mac (Microsoft Remote Desktop):${NC}"
-  echo -e "     Servidor: IP_DE_LA_VM:3389"
-  echo -e "     Usuario:  (tu usuario de la VM)"
+  if [ "$REMOTE_MODE" = "local" ]; then
+    echo ""
+    echo -e "  ${CYAN}Conexion local VRDE:${NC}"
+    echo -e "     Servidor: 127.0.0.1:$VRDE_PORT"
+  fi
   echo ""
 
   # Preguntar si arrancar
   if wt_yesno "Arrancar VM" "Quieres arrancar la VM '$VM_NAME' ahora?"; then
     echo -e "${YELLOW}[*] Arrancando VM...${NC}"
-    VBoxManage startvm "$VM_NAME" --type headless 2>&1
+    VBoxManage startvm "$VM_NAME" --type gui 2>&1
     echo -e "${GREEN}[OK] VM arrancada${NC}"
 
     # Esperar un poco y mostrar IP si es bridged
@@ -835,7 +951,9 @@ WINEOF
 backup_vm() {
   mkdir -p "$BACKUP_DIR"
 
-  local backup_file="$BACKUP_DIR/${VM_NAME}.backup.json"
+  local backup_name
+  backup_name=$(safe_filename "$VM_NAME")
+  local backup_file="$BACKUP_DIR/${backup_name}.backup.json"
 
   # Solo guardar si NO existe un backup previo (el primero siempre es el original)
   if [ -f "$backup_file" ]; then
@@ -847,48 +965,99 @@ backup_vm() {
 
   # Leer configuracion actual
   local info=$(VBoxManage showvminfo "$VM_NAME" --machinereadable 2>/dev/null)
-  local memory=$(echo "$info" | grep "^memory=" | cut -d'=' -f2)
-  local cpus=$(echo "$info" | grep "^cpus=" | cut -d'=' -f2)
-  local mac=$(echo "$info" | grep "^macaddress1=" | cut -d'"' -f2)
-  local nic=$(echo "$info" | grep "^nic1=" | cut -d'"' -f2)
-  local vram=$(echo "$info" | grep "^vram=" | cut -d'=' -f2)
+  local memory=$(mr_value "$info" "memory")
+  local cpus=$(mr_value "$info" "cpus")
+  local mac=$(mr_value "$info" "macaddress1")
+  local nic=$(mr_value "$info" "nic1")
+  local bridgeadapter=$(mr_value "$info" "bridgeadapter1")
+  local vram=$(mr_value "$info" "vram")
+  local graphicscontroller=$(mr_value "$info" "graphicscontroller")
+  local accelerate3d=$(mr_value "$info" "accelerate3d")
+  local paravirtprovider=$(mr_value "$info" "paravirtprovider")
+  local audiodriver=$(mr_value "$info" "audio")
+  local audioout=$(mr_value "$info" "audio_out")
+  local audioin=$(mr_value "$info" "audio_in")
+  local clipboard=$(mr_value "$info" "clipboard")
+  local draganddrop=$(mr_value "$info" "draganddrop")
+  local xhci=$(mr_value "$info" "xhci")
+  local vrde=$(mr_value "$info" "vrde")
+  local vrdeport=$(mr_value "$info" "vrdeport")
+  local vrdeaddress=$(mr_value "$info" "vrdeaddress")
+  local vrdeauthtype=$(mr_value "$info" "vrdeauthtype")
+  local cfg_file=$(mr_value "$info" "CfgFile")
+  local cfg_backup=""
+
+  if [ -n "$cfg_file" ] && [ -f "$cfg_file" ]; then
+    cfg_backup="$BACKUP_DIR/${backup_name}.original.vbox"
+    cp -p "$cfg_file" "$cfg_backup" 2>/dev/null || cfg_backup=""
+  fi
 
   # Leer extradata
-  local extradata="{"
-  local first=true
+  local extradata="{}"
   while IFS= read -r line; do
     if [[ "$line" =~ ^Key:\ (.+),\ Value:\ (.*) ]]; then
       local key="${BASH_REMATCH[1]}"
       local val="${BASH_REMATCH[2]}"
-      # Escapar comillas en el valor
-      val=$(echo "$val" | sed 's/"/\\"/g')
-      if [ "$first" = true ]; then
-        first=false
-      else
-        extradata+=","
-      fi
-      extradata+="\"$key\":\"$val\""
+      extradata=$(jq -c --arg key "$key" --arg val "$val" '. + {($key): $val}' <<< "$extradata")
     fi
   done < <(VBoxManage getextradata "$VM_NAME" enumerate 2>/dev/null)
-  extradata+="}"
 
-  # Escribir JSON
-  cat > "$backup_file" << BKEOF
-{
-  "vm_name": "$VM_NAME",
-  "date": "$(date '+%Y-%m-%d %H:%M:%S')",
-  "config": {
-    "memory": "$memory",
-    "cpus": "$cpus",
-    "macaddress1": "$mac",
-    "nic1": "$nic",
-    "vram": "$vram"
-  },
-  "extradata": $extradata
-}
-BKEOF
+  jq -n \
+    --arg vm_name "$VM_NAME" \
+    --arg date "$(date '+%Y-%m-%d %H:%M:%S')" \
+    --arg cfg_file "$cfg_file" \
+    --arg cfg_backup "$cfg_backup" \
+    --arg memory "$memory" \
+    --arg cpus "$cpus" \
+    --arg macaddress1 "$mac" \
+    --arg nic1 "$nic" \
+    --arg bridgeadapter1 "$bridgeadapter" \
+    --arg vram "$vram" \
+    --arg graphicscontroller "$graphicscontroller" \
+    --arg accelerate3d "$accelerate3d" \
+    --arg paravirtprovider "$paravirtprovider" \
+    --arg audiodriver "$audiodriver" \
+    --arg audioout "$audioout" \
+    --arg audioin "$audioin" \
+    --arg clipboard "$clipboard" \
+    --arg draganddrop "$draganddrop" \
+    --arg xhci "$xhci" \
+    --arg vrde "$vrde" \
+    --arg vrdeport "$vrdeport" \
+    --arg vrdeaddress "$vrdeaddress" \
+    --arg vrdeauthtype "$vrdeauthtype" \
+    --argjson extradata "$extradata" \
+    '{
+      vm_name: $vm_name,
+      date: $date,
+      config_file: $cfg_file,
+      config_backup: $cfg_backup,
+      config: {
+        memory: $memory,
+        cpus: $cpus,
+        macaddress1: $macaddress1,
+        nic1: $nic1,
+        bridgeadapter1: $bridgeadapter1,
+        vram: $vram,
+        graphicscontroller: $graphicscontroller,
+        accelerate3d: $accelerate3d,
+        paravirtprovider: $paravirtprovider,
+        audiodriver: $audiodriver,
+        audioout: $audioout,
+        audioin: $audioin,
+        clipboard: $clipboard,
+        draganddrop: $draganddrop,
+        xhci: $xhci,
+        vrde: $vrde,
+        vrdeport: $vrdeport,
+        vrdeaddress: $vrdeaddress,
+        vrdeauthtype: $vrdeauthtype
+      },
+      extradata: $extradata
+    }' > "$backup_file"
 
   echo -e "${GREEN}[OK] Backup guardado en: $backup_file${NC}"
+  [ -n "$cfg_backup" ] && echo -e "${GREEN}[OK] Copia .vbox guardada en: $cfg_backup${NC}"
 }
 
 # =============================================================================
@@ -938,19 +1107,52 @@ restore_vm() {
   echo ""
 
   # Restaurar config basica
-  echo -e "${YELLOW}[ 20%] Restaurando RAM, CPUs, MAC...${NC}"
+  echo -e "${YELLOW}[ 20%] Restaurando recursos, red, graficos y acceso remoto...${NC}"
   local mem=$(jq -r '.config.memory' "$selected")
   local cpu=$(jq -r '.config.cpus' "$selected")
   local vr=$(jq -r '.config.vram' "$selected")
   local ma=$(jq -r '.config.macaddress1' "$selected")
-  VBoxManage modifyvm "$vm_name" --memory "$mem" --cpus "$cpu" --vram "$vr" 2>/dev/null || true
-  [ -n "$ma" ] && [ "$ma" != "null" ] && VBoxManage modifyvm "$vm_name" --macaddress1 "$ma" 2>/dev/null || true
+  local nic=$(jq -r '.config.nic1 // empty' "$selected")
+  local bridge=$(jq -r '.config.bridgeadapter1 // empty' "$selected")
+  local graphics=$(jq -r '.config.graphicscontroller // empty' "$selected")
+  local accel3d=$(jq -r '.config.accelerate3d // empty' "$selected")
+  local paravirt=$(jq -r '.config.paravirtprovider // empty' "$selected")
+  local audiodriver=$(jq -r '.config.audiodriver // empty' "$selected")
+  local audioout=$(jq -r '.config.audioout // empty' "$selected")
+  local audioin=$(jq -r '.config.audioin // empty' "$selected")
+  local clipboard=$(jq -r '.config.clipboard // empty' "$selected")
+  local draganddrop=$(jq -r '.config.draganddrop // empty' "$selected")
+  local xhci=$(jq -r '.config.xhci // empty' "$selected")
+  local vrde=$(jq -r '.config.vrde // empty' "$selected")
+  local vrdeport=$(jq -r '.config.vrdeport // empty' "$selected")
+  local vrdeaddress=$(jq -r '.config.vrdeaddress // empty' "$selected")
+  local vrdeauthtype=$(jq -r '.config.vrdeauthtype // empty' "$selected")
+
+  vbox_try modifyvm "$vm_name" --memory "$mem" --cpus "$cpu" --vram "$vr"
+  [ -n "$ma" ] && [ "$ma" != "null" ] && vbox_try modifyvm "$vm_name" --macaddress1 "$ma"
+  [ -n "$nic" ] && [ "$nic" != "null" ] && vbox_try modifyvm "$vm_name" --nic1 "$nic"
+  [ "$nic" = "bridged" ] && [ -n "$bridge" ] && [ "$bridge" != "null" ] && vbox_try modifyvm "$vm_name" --bridgeadapter1 "$bridge"
+  [ -n "$graphics" ] && [ "$graphics" != "null" ] && vbox_try modifyvm "$vm_name" --graphicscontroller "$graphics"
+  [ -n "$accel3d" ] && [ "$accel3d" != "null" ] && vbox_try modifyvm "$vm_name" --accelerate3d "$accel3d"
+  [ -n "$paravirt" ] && [ "$paravirt" != "null" ] && vbox_try modifyvm "$vm_name" --paravirt-provider "$paravirt"
+  [ -n "$audiodriver" ] && [ "$audiodriver" != "null" ] && vbox_try modifyvm "$vm_name" --audio-driver "$audiodriver"
+  [ -n "$audioout" ] && [ "$audioout" != "null" ] && vbox_try modifyvm "$vm_name" --audio-out "$audioout"
+  [ -n "$audioin" ] && [ "$audioin" != "null" ] && vbox_try modifyvm "$vm_name" --audio-in "$audioin"
+  [ -n "$clipboard" ] && [ "$clipboard" != "null" ] && vbox_try modifyvm "$vm_name" --clipboard-mode "$clipboard"
+  [ -n "$draganddrop" ] && [ "$draganddrop" != "null" ] && vbox_try modifyvm "$vm_name" --drag-and-drop "$draganddrop"
+  [ -n "$xhci" ] && [ "$xhci" != "null" ] && vbox_try modifyvm "$vm_name" --usb-xhci "$xhci"
+  [ -n "$vrde" ] && [ "$vrde" != "null" ] && vbox_try modifyvm "$vm_name" --vrde "$vrde"
+  [ -n "$vrdeport" ] && [ "$vrdeport" != "null" ] && vbox_try modifyvm "$vm_name" --vrde-port "$vrdeport"
+  [ -n "$vrdeaddress" ] && [ "$vrdeaddress" != "null" ] && vbox_try modifyvm "$vm_name" --vrde-address "$vrdeaddress"
+  [ -n "$vrdeauthtype" ] && [ "$vrdeauthtype" != "null" ] && vbox_try modifyvm "$vm_name" --vrde-auth-type "$vrdeauthtype"
+
+  remove_spoofer_usb_filters "$vm_name"
 
   # Borrar extradata de camuflaje
   echo -e "${YELLOW}[ 50%] Limpiando camuflaje actual...${NC}"
   while IFS= read -r line; do
     if [[ "$line" =~ ^Key:\ (VBoxInternal/.+), ]]; then
-      VBoxManage setextradata "$vm_name" "${BASH_REMATCH[1]}" 2>/dev/null || true
+      vbox_try setextradata "$vm_name" "${BASH_REMATCH[1]}"
     fi
   done < <(VBoxManage getextradata "$vm_name" enumerate 2>/dev/null)
 
@@ -958,7 +1160,7 @@ restore_vm() {
   echo -e "${YELLOW}[ 80%] Restaurando configuracion original...${NC}"
   for key in $(jq -r '.extradata | keys[]' "$selected"); do
     local val=$(jq -r ".extradata[\"$key\"]" "$selected")
-    [ -n "$val" ] && [ "$val" != "null" ] && VBoxManage setextradata "$vm_name" "$key" "$val" 2>/dev/null || true
+    [ -n "$val" ] && [ "$val" != "null" ] && vbox_try setextradata "$vm_name" "$key" "$val"
   done
 
   echo -e "${GREEN}[100%] Completado${NC}"

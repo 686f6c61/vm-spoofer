@@ -1,8 +1,12 @@
 # VM Spoofer
 
-Sistema para camuflar máquinas virtuales de VirtualBox. Modifica los identificadores de hardware (fabricante, BIOS, placa base, disco, GPU, MAC, chipset) para que herramientas de detección como `systeminformation` no identifiquen el sistema como una máquina virtual.
+Sistema para camuflar máquinas virtuales de VirtualBox en modo escritorio. Modifica identificadores de hardware para que el perfil `OK VM Proctoring` pase las llamadas observadas de `systeminformation` (`system`, `diskLayout`, `processes`, `osInfo`, `mem`, `cpu`) y las validaciones de `uiohook-napi` / `keyspy@1.1.1` sin romper Guest Additions ni la experiencia de usuario.
 
 Funciona en **Windows** (PowerShell), **Linux** (Bash + whiptail) y **macOS** (Bash + dialog). En macOS detecta automáticamente si el Mac es **Intel** o **Apple Silicon**.
+
+Versión actual: `v1.1.2`.
+
+> Uso previsto: laboratorios, QA, validación e integración en entornos propios o con autorización explícita. Antes de usarlo en un entorno de cliente, revisa `SECURITY.md`, crea snapshot/exportación de la VM y conserva la carpeta `backups/`.
 
 ---
 
@@ -12,7 +16,7 @@ Cuando ejecutas una máquina virtual en VirtualBox, el sistema operativo invitad
 
 Esto es un problema en muchos contextos: software que rechaza ejecutarse en VMs, plataformas que detectan y bloquean entornos virtualizados, pruebas de seguridad donde necesitas que el sistema parezca real, o simplemente privacidad.
 
-VM Spoofer resuelve esto reemplazando todos esos identificadores por los de equipos reales del mercado. Una VM camuflada como un Lenovo ThinkPad X1 Carbon, un Dell XPS 15 o un Apple MacBook Pro es indistinguible de la máquina real para cualquier software que consulte el hardware.
+VM Spoofer resuelve `OK VM Proctoring` reemplazando esos identificadores por los de equipos reales del mercado. Una VM camuflada como un Lenovo ThinkPad X1 Carbon, un Dell XPS 15 o un Apple MacBook Pro debe verse coherente para el perfil de consultas de `systeminformation` que validamos; no se promete invisibilidad universal contra cualquier detector.
 
 ---
 
@@ -22,7 +26,7 @@ VirtualBox almacena la configuración de cada VM en un archivo `.vbox` y permite
 
 Los cambios se aplican a nivel de VirtualBox, no dentro de la VM. Eso significa que no necesitas instalar nada en el sistema invitado para que el camuflaje funcione. El SO invitado simplemente lee los nuevos identificadores como si fueran hardware real.
 
-En VMs Linux hay un paso adicional opcional: un script de post-instalación que camufla los nombres de los dispositivos PCI (que `lspci` lee directamente del hardware emulado) y bloquea los módulos del kernel de VirtualBox que también pueden delatar la VM.
+En VMs Linux hay un paso adicional opcional de `OK VM Proctoring` que camufla los nombres de los dispositivos PCI visibles por `lspci` sin desinstalar ni bloquear Guest Additions. La limpieza estricta queda separada como fuera de alcance proctoring.
 
 ---
 
@@ -40,11 +44,11 @@ El camuflaje abarca todas las capas que las herramientas de detección consultan
 
 **Paravirtualización** es un mecanismo que VirtualBox usa para comunicarse con el SO invitado de forma eficiente. Pero su presencia delata que hay un hipervisor. VM Spoofer la desactiva.
 
-**VMMDev** es el dispositivo de comunicación entre VirtualBox y las Guest Additions. VM Spoofer desactiva la sincronización de hora que puede usarse para detectar la VM.
+**VMMDev** es el dispositivo de comunicación entre VirtualBox y las Guest Additions. En OK VM Proctoring se mantiene porque Guest Additions deben funcionar; solo se desactiva la sincronización de hora expuesta por VMMDev.
 
-**Dispositivos PCI** (solo Linux): `lspci` muestra los dispositivos de hardware emulados por VirtualBox con nombres como "VMware SVGA II Adapter" o "InnoTek VirtualBox Guest Service". El script de post-instalación para Linux crea un wrapper que reemplaza estos nombres por los del chipset real elegido.
+**Dispositivos PCI** (solo Linux): `lspci` muestra los dispositivos de hardware emulados por VirtualBox con nombres como "VMware SVGA II Adapter" o "InnoTek VirtualBox Guest Service". El script de post-instalación para Linux crea un wrapper que reemplaza estos nombres por los del chipset real elegido, manteniendo Guest Additions.
 
-**USB y periféricos**: En Windows y Linux, VM Spoofer detecta cámaras, micrófonos y altavoces USB conectados al host y crea filtros para que se conecten automáticamente a la VM cada vez que arranca. En macOS, el micrófono y los altavoces integrados se pasan a la VM mediante audio-in/audio-out de VirtualBox (no son USB, el script lo gestiona automáticamente). La cámara FaceTime de los Mac es un dispositivo interno, no USB, y VirtualBox no puede redirigirla. Soluciones de software como OBS Virtual Camera pueden ser detectadas por herramientas de análisis, lo que comprometería el camuflaje. Si necesitas usar cámara en una VM desde un Mac, conecta una **webcam USB externa** (Logitech, Insta360, etc.) que el script detectará y configurará automáticamente como en Windows y Linux.
+**Periféricos de escritorio**: audio y micrófono se activan con audio-in/audio-out de VirtualBox. Para cámara se prioriza el passthrough de webcam de VirtualBox desde el launcher cuando está disponible. Los filtros USB quedan como opción manual para dispositivos externos concretos; no se seleccionan automáticamente para evitar capturas inesperadas.
 
 ---
 
@@ -61,7 +65,7 @@ El camuflaje abarca todas las capas que las herramientas de detección consultan
 | GPU | Cambia el nombre de la tarjeta gráfica (en Linux vía post-install) | Evita "VMware SVGA II Adapter" |
 | Red | Genera una MAC con prefijo del fabricante real | Evita el prefijo 08:00:27 de VirtualBox |
 | Chipset | Plantilla que cambia todos los dispositivos PCI (en Linux vía post-install) | Evita nombres de chipset virtual en lspci |
-| USB | Detecta periféricos de audio/video y crea filtros automáticos | Cámara, micro y altavoces funcionan en la VM |
+| Periféricos | Activa audio/micro y permite webcam passthrough o USB externo opcional | Mantiene la VM como escritorio usable |
 
 ---
 
@@ -69,11 +73,24 @@ El camuflaje abarca todas las capas que las herramientas de detección consultan
 
 | Archivo | Descripción |
 |---|---|
+| `start.sh` | Launcher recomendado para Linux |
+| `start.command` | Launcher recomendado para macOS |
+| `start.ps1` | Launcher recomendado para Windows |
+| `launcher.js` | Menu guiado comun para preparar, verificar y generar informes |
+| `guest-cleanup-linux.sh` | Limpieza estricta de artefactos guest en Linux |
 | `vm-spoofer.ps1` | Script principal para Windows (PowerShell) |
 | `vm-spoofer.sh` | Script principal para Linux (Bash + whiptail) |
 | `vm-spoofer-mac.sh` | Script principal para macOS Intel/Apple Silicon (Bash + dialog) |
 | `hardware-db.json` | Base de datos con perfiles de hardware reales (43 fabricantes, 38 CPUs, 24 discos, 36 GPUs, 22 NICs, 9 chipsets) |
+| `banned-programs.json` | Catálogo local de programas bloqueados por plataforma para validación con `systeminformation.processes()` |
+| `app-policy.json` | Política de decisión: denylist, permitido por defecto y reglas fuera de alcance |
 | `check.js` | Script de verificación con systeminformation (Node.js) |
+| `process-watch.js` | Verificador dinamico de `systeminformation.processes()` contra `bannedPrograms` mientras abres software dentro de la VM |
+| `input-hook-check.js` | Verificador consentido de hooks globales con `uiohook-napi` o `keyspy` |
+| `validation-runner.js` | Generador de bundle de validación por VM/SO |
+| `OK_VM_PROCTORING.md` | Alcance exacto de OK VM Proctoring: Guest Additions, systeminformation y hooks |
+| `BANNED_PROGRAMS.md` | Alcance de detección nominal por `systeminformation.processes()` |
+| `SECURITY.md` | Política de uso autorizado y seguridad operativa |
 | `INSTRUCCIONES-WINDOWS.txt` | Guía paso a paso para Windows |
 | `INSTRUCCIONES-LINUX.txt` | Guía paso a paso para Linux |
 | `INSTRUCCIONES-MACOS.txt` | Guía paso a paso para macOS (Intel y Apple Silicon) |
@@ -86,19 +103,22 @@ El camuflaje abarca todas las capas que las herramientas de detección consultan
 ### Windows
 - VirtualBox (https://www.virtualbox.org)
 - PowerShell (incluido en Windows 10/11)
+- Node.js (https://nodejs.org) para el launcher y verificadores
 
 ### Linux
 - VirtualBox (`sudo apt install virtualbox`)
 - jq (`sudo apt install jq`)
 - whiptail (`sudo apt install whiptail`)
+- Node.js y npm (`sudo apt install nodejs npm`)
 
 ### macOS (Intel y Apple Silicon)
 - VirtualBox (https://www.virtualbox.org)
 - Homebrew (https://brew.sh)
 - dialog (`brew install dialog`)
 - jq (`brew install jq`)
+- Node.js (`brew install node`)
 
-No se necesita instalar nada dentro de la VM para que el camuflaje funcione. Solo para la verificación posterior (opcional) se usa Node.js con `systeminformation`.
+Los cambios DMI/SMBIOS, disco, red y firmware se aplican desde el host. En Linux, el post-install opcional completa la parte visible por `lspci` sin desactivar Guest Additions. Para la verificación posterior se puede usar Node.js con `systeminformation`.
 
 ---
 
@@ -107,25 +127,39 @@ No se necesita instalar nada dentro de la VM para que el camuflaje funcione. Sol
 ### Windows
 
 ```powershell
-cd ruta\a\vm-creator
-powershell -ExecutionPolicy Bypass -File vm-spoofer.ps1
+cd ruta\a\vm-spoofer
+powershell -ExecutionPolicy Bypass -File start.ps1
 ```
 
 ### Linux
 
 ```bash
-cd ruta/a/vm-creator
-bash vm-spoofer.sh
+cd ruta/a/vm-spoofer
+./start.sh
 ```
 
 ### macOS
 
 ```bash
-cd ruta/a/vm-creator
-bash vm-spoofer-mac.sh
+cd ruta/a/vm-spoofer
+./start.command
 ```
 
-El script detecta automáticamente si el Mac es Intel o Apple Silicon y lo muestra en cada pantalla del asistente.
+El launcher muestra un menu simple:
+
+1. Elegir sistema aparente y preparar VM.
+2. Verificar `systeminformation`.
+3. Validar software abierto contra `bannedPrograms`.
+4. Validar hooks de teclado/raton.
+5. Generar informe `OK VM Proctoring`.
+6. Conectar webcam a una VM arrancada.
+7. Fuera de alcance proctoring: diagnostico avanzado.
+8. Fuera de alcance proctoring: herramientas estrictas.
+9. Ver rutas de documentacion.
+
+No necesitas recordar comandos. Las herramientas tecnicas siguen disponibles debajo (`vm-spoofer.sh`, `vm-spoofer-mac.sh`, `vm-spoofer.ps1`, `check.js`, `validation-runner.js`), pero el flujo recomendado es usar el launcher.
+
+El script de macOS detecta automáticamente si el Mac es Intel o Apple Silicon y lo muestra en cada pantalla del asistente.
 
 El asistente guía en 8 pasos:
 
@@ -135,10 +169,12 @@ El asistente guía en 8 pasos:
 4. **RAM y CPUs** - recursos simulados (pueden ser mayores que los reales)
 5. **Disco, GPU y Red** - periféricos con generador de MAC (auto/manual/regenerar)
 6. **Chipset PCI** - plantilla de dispositivos PCI
-7. **Dispositivos USB** - detecta cámaras, micrófonos y altavoces automáticamente
+7. **Periféricos** - audio/micro por VirtualBox y USB externo solo si lo eliges
 8. **Confirmar y aplicar** - muestra resumen y aplica los cambios
 
 No necesitas saber nada de VirtualBox ni de línea de comandos. El script hace todo el trabajo: detecta las VMs, gestiona su estado, aplica los cambios y genera los scripts de post-instalación si son necesarios.
+
+La eleccion de fabricante/modelo/CPU/disco/GPU/NIC es el "maquillaje" del sistema. Para Windows y Linux usa perfiles PC coherentes; para macOS usa perfiles Apple solo si el guest realmente es macOS.
 
 ### Capturas de pantalla
 
@@ -184,7 +220,7 @@ No necesitas saber nada de VirtualBox ni de línea de comandos. El script hace t
 
 ## Verificación
 
-Una vez aplicado el camuflaje y arrancada la VM, la forma más fiable de verificar que funciona es usar la librería `systeminformation` de Node.js. Esta librería es la referencia del sector: tiene más de 4 millones de descargas semanales en npm y es la que usan la mayoría de aplicaciones y plataformas para detectar máquinas virtuales.
+Una vez aplicado el camuflaje y arrancada la VM, la forma más fiable de verificar que funciona es usar la librería `systeminformation` de Node.js con el verificador incluido.
 
 ### Con Node.js (recomendado)
 
@@ -192,7 +228,7 @@ Dentro de la VM, instalar Node.js (https://nodejs.org) y ejecutar:
 
 ```bash
 mkdir vm-verify && cd vm-verify
-npm install systeminformation
+npm install systeminformation@5.31.6
 ```
 
 Copiar `check.js` a la carpeta y ejecutar:
@@ -202,41 +238,89 @@ node check.js        # Windows
 sudo node check.js   # Linux (necesita sudo para acceder a DMI)
 ```
 
+Fuera de alcance proctoring, para diagnóstico más estricto por sistema operativo:
+
+```bash
+node check.js --advanced        # Windows/macOS
+sudo node check.js --advanced   # Linux
+```
+
+El modo avanzado añade checks específicos por SO: WMI/CIM y drivers en Windows, sysfs/ACPI/módulos en Linux, e `ioreg`/`system_profiler`/kexts en macOS. No forma parte de `OK VM Proctoring` salvo que el cliente active esas señales.
+
+El verificador ejecuta también `systeminformation.processes()` porque el bundle observado compara procesos contra `bannedPrograms`. Cuando tengas esa lista, pásala así:
+
+```bash
+node check.js --banned-programs banned-programs.txt
+```
+
+Si usas el catálogo local estructurado por categorías/plataformas:
+
+```bash
+node check.js --banned-programs banned-programs.json --banned-platform auto
+```
+
+Para validar lo que ocurre al abrir software de analisis dentro de la VM, usa el watch dinamico. Durante la ventana de prueba abre la aplicacion que quieras comprobar:
+
+```bash
+node process-watch.js --banned-programs banned-programs.txt --duration 60 --interval 2
+```
+
+Si la lista incluye procesos de Guest Additions como `VBoxService` o `VBoxClient`, OK VM Proctoring fallará por requisito funcional del detector. En ese caso hay que decidir si se cambia la lista o se abre una línea avanzada separada.
+
+Para ampliar fuera del bundle observado:
+
+```bash
+node check.js --broad-hardware
+node check.js --include-services
+```
+
+Si el cliente usa librerías de hook global como `uiohook-napi` o `keyspy@1.1.1`, valida esa superficie por separado:
+
+```bash
+npm install uiohook-napi@1.5.5
+node input-hook-check.js --provider uiohook-napi --duration 15
+
+npm install keyspy@1.1.1
+node input-hook-check.js --provider keyspy --duration 15
+```
+
+Ese verificador no registra teclas ni texto: solo comprueba que el hook recibe eventos reales de teclado/ratón.
+
+Para empaquetar la evidencia de entrega:
+
+```bash
+node validation-runner.js --out validation-runs/linux-a515 \
+  --banned-programs banned-programs.txt \
+  --run-process-watch --process-watch-duration 60 \
+  --run-input-hooks --hook-provider keyspy --hook-duration 15 --yes
+```
+
+El runner genera `metadata.json`, `steps.json`, salidas completas de cada verificador y un `summary.md` con el estado de aceptación.
+
 El script analiza todos los indicadores de hardware y muestra un informe completo:
 
 ```
-=== Verificación de hardware (systeminformation) ===
-
-[SISTEMA]
-  Fabricante:      Dell Inc.
-  Modelo:          XPS 15 9530
-  Virtual:         false
-  VirtualHost:     undefined
+[SYSTEM]
+manufacturer       Micro-Star International Co., Ltd.
+model              Raider GE78 HX 13VH
 
 [BIOS]
-  Vendor:          Dell Inc.
-  Version:         1.23.0
+vendor             American Megatrends International, LLC.
+version            E17RCIMS.10A
 
-[DISCOS]
-  Disco 0:
-    Nombre:        Samsung SSD 990 PRO 1TB
-    Vendor:        Samsung
+[DISKS]
+- Samsung Samsung SSD 990 PRO 1TB serial=S6Z2NF037820
 
-[RED]
-  enp0s3:
-    MAC:           b4:2e:99:3f:a8:21
-    Virtual:       false
+[GRAPHICS]
+- Intel Corporation UHD Graphics 770
 
-=== RESULTADO CLAVE ===
-  system.virtual:      NO detectada (bien)
-  system.virtualHost:  (vacío - bien)
-  Fabricante:          Dell Inc.
-  Modelo:              XPS 15 9530
+[FINDINGS]
+No common VM indicators detected by this verifier.
 
-  [OK] El sistema aparenta ser hardware físico.
+Score: 0/100
 ```
 
-Si `system.virtual` sale `true`, significa que algún indicador no se camufló correctamente. Revisa que la VM estaba apagada cuando aplicaste los cambios y, en Linux, que ejecutaste el script de post-instalación.
+Si el verificador muestra findings de VirtualBox, Oracle, VMware, QEMU, KVM o prefijos MAC virtuales, significa que algún indicador no se camufló correctamente. Revisa que la VM estaba apagada cuando aplicaste los cambios y, en Linux, que ejecutaste el script de post-instalación.
 
 ### Sin Node.js
 
@@ -275,8 +359,8 @@ Estas son las fuentes de información que consultan las herramientas de detecci�
 | `graphics.vendor` | GPU (lspci en Linux, DMI en Windows) | Media | Sí |
 | `networkInterfaces.mac` | Prefijo MAC de la tarjeta de red | Media | Sí |
 | `chassis.type` | Tipo de chasis (notebook, desktop, tablet) | Baja | Sí |
-| Módulos del kernel | vboxguest, vboxsf, vboxvideo | Media | Sí (Linux post-install) |
-| Dispositivos PCI | lspci: VMware SVGA, InnoTek Guest Service | Media | Sí (Linux post-install) |
+| Módulos del kernel | vboxguest, vboxsf, vboxvideo | Media | No en OK VM Proctoring: Guest Additions deben funcionar |
+| Dispositivos PCI | lspci: VMware SVGA, InnoTek Guest Service | Media | Sí, nombres visibles por wrapper Linux opcional |
 | Combinación de todos | Correlación de múltiples fuentes | Muy alta | Sí |
 
 La detección más robusta combina varios indicadores. Un disco "Samsung" con fabricante "VirtualBox" sería sospechoso. VM Spoofer cambia todas las capas para que sean coherentes entre sí.
@@ -382,12 +466,13 @@ Cada plantilla cambia los nombres de todos los dispositivos PCI de la VM (host b
 | Interfaz | Menús en terminal | whiptail (gráfico) | dialog (gráfico) |
 | Dependencias | Solo VirtualBox | VirtualBox + jq + whiptail | VirtualBox + jq + dialog (brew) |
 | Detección arch | - | - | Intel / Apple Silicon |
-| Post-instalación | No necesaria | Necesaria (lspci + módulos) | Necesaria (lspci + módulos) |
+| Post-instalación | No necesaria | Opcional/recomendada (lspci + módulos) | No necesaria |
 | Verificación | PowerShell o Node.js | dmidecode, lspci o Node.js | Node.js |
 | Detección firmware | EFI/BIOS auto | EFI/BIOS auto | EFI/BIOS auto |
 | Gestión estados VM | Sí | Sí | Sí |
 | Generador MAC | Auto, manual, random | Auto, manual, random | Auto, manual, random |
-| Detección USB | Sí | Sí | Sí |
+| Periféricos | Audio/micro + USB externo opcional | Audio/micro + USB externo opcional | Audio/micro + USB externo opcional |
+| VRDE/RDP VirtualBox | No se activa automáticamente | Desactivado por defecto, local-only si se habilita | Desactivado por defecto, local-only si se habilita |
 
 ---
 
@@ -400,7 +485,10 @@ No. El script detecta el estado de la VM y la prepara automáticamente. Si está
 No. El script solo modifica metadatos de VirtualBox (el archivo .vbox de la VM). No toca los archivos dentro del disco virtual ni modifica el sistema operativo invitado.
 
 **Puedo revertir los cambios?**
-Sí. El script guarda un backup automático antes de aplicar los cambios. Puedes restaurar la configuración original ejecutando el script de nuevo y eligiendo la opción "Restaurar".
+Sí. El script guarda un backup automático antes de aplicar los cambios, incluyendo extradata, recursos básicos, red, gráficos, paravirtualización, VRDE y una copia del `.vbox` cuando está disponible. Puedes restaurar la configuración original ejecutando el script de nuevo y eligiendo la opción "Restaurar".
+
+**El acceso remoto queda abierto?**
+No por defecto. En Linux y macOS, VRDE/RDP de VirtualBox queda desactivado salvo que lo habilites explícitamente. Si lo activas desde el asistente, se limita a `127.0.0.1` y al puerto local elegido.
 
 **Funciona con VMware, Hyper-V o KVM?**
 No. VM Spoofer es exclusivo para VirtualBox. Cada hipervisor tiene su propia forma de almacenar los identificadores de hardware y necesitaría un script diferente.
@@ -409,16 +497,16 @@ No. VM Spoofer es exclusivo para VirtualBox. Cada hipervisor tiene su propia for
 No. Los cambios son solo cosméticos (nombres e identificadores). El rendimiento de la VM no se ve afectado en absoluto.
 
 **Por qué en Linux hay un paso de post-instalación y en Windows no?**
-Porque `lspci` en Linux lee los identificadores directamente del bus PCI emulado, no del DMI. Windows no tiene un equivalente que haga eso; `systeminformation` en Windows lee del DMI que ya está cambiado desde fuera. En Linux, el post-install crea un wrapper para `lspci` y bloquea módulos del kernel como `vboxguest` que también delatan la VM.
+Porque `lspci` en Linux lee los identificadores directamente del bus PCI emulado, no del DMI. Windows no tiene un equivalente que haga eso; `systeminformation` en Windows lee del DMI que ya está cambiado desde fuera. En OK VM Proctoring, el post-install crea un wrapper para `lspci` pero no bloquea `vboxguest`, `vboxsf` ni `vboxvideo`, porque Guest Additions deben seguir funcionando.
 
 **Puedo simular un Apple MacBook en una VM Windows?**
-Sí. Puedes elegir cualquier perfil independientemente del SO de la VM. Un Windows 11 camuflado como MacBook Pro aparecerá con fabricante "Apple Inc." y modelo "MacBookPro18,3" en `systeminformation`. Los perfiles Apple están pensados para esto: simular hardware Apple desde una VM Windows o Linux. No es necesario tener un Mac ni ejecutar macOS.
+Técnicamente sí, porque el configurador permite elegir cualquier perfil. Para entrega de OK VM Proctoring conviene mantener coherencia: Windows/Linux con perfiles PC normales y macOS con perfiles Apple cuando el guest realmente sea macOS. Si se fuerza un perfil Apple sobre Windows/Linux, debe quedar marcado como caso de prueba específico.
 
 **El generador de MAC es seguro?**
 Los prefijos MAC usados son OUI reales registrados en el IEEE por cada fabricante. Los últimos 3 octetos se generan aleatoriamente. Una MAC generada es indistinguible de la de un dispositivo real del mismo fabricante.
 
-**Qué pasa con los dispositivos USB (cámara, micro)?**
-El script detecta automáticamente las cámaras, micrófonos y altavoces conectados al host. Los que selecciones se conectarán a la VM cada vez que arranque mediante filtros USB de VirtualBox. Puedes usar la webcam y el micro dentro de la VM como si fueran locales.
+**Qué pasa con cámara, micro y altavoces?**
+Audio y micrófono se activan con audio-in/audio-out de VirtualBox. Para cámara, el launcher incluye una opción de webcam passthrough sobre una VM arrancada. Los filtros USB siguen existiendo, pero son manuales y opcionales para dispositivos externos concretos.
 
 ---
 
@@ -429,7 +517,7 @@ La herramienta de referencia para la detección de VMs es **systeminformation**:
 - **Repositorio**: https://github.com/sebhildebrandt/systeminformation
 - **npm**: https://www.npmjs.com/package/systeminformation
 - **Tipo**: librería open source de Node.js
-- **Plataformas de la librería**: Windows, Linux, macOS (VM Spoofer funciona en Windows y Linux)
+- **Plataformas de la librería**: Windows, Linux, macOS (VM Spoofer cubre las tres)
 - **Uso**: `const si = require("systeminformation")` en Node.js
 - **Campos clave para detección de VM**: `system().virtual`, `system().virtualVendor`, `system().virtualHost`, `diskLayout().name`, `diskLayout().vendor`, `graphics().controllers[].vendor`, `networkInterfaces().mac`
 

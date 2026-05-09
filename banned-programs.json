@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "mode": "denylist",
+  "defaultDecision": "allowed",
+  "listedProgramDecision": "blocked",
+  "categories": [
+    {
+      "name": "Procesadores de texto",
+      "programs": [
+        { "name": "Gedit", "linux": ["gedit"] },
+        { "name": "Kate", "linux": ["kate"] },
+        { "name": "KWrite", "linux": ["kwrite"] },
+        { "name": "Microsoft OneNote", "windows": ["ONENOTE.EXE"], "macos": ["Microsoft OneNote"] },
+        { "name": "Microsoft Word", "windows": ["WINWORD.EXE", "WINWORDC.EXE"], "macos": ["Microsoft Word"] },
+        { "name": "Notas", "windows": ["StikyNot.exe"], "macos": ["Notas", "Notas Adhesivas", "Notes", "Stickies"] },
+        { "name": "Notepad / Bloc notas", "windows": ["notepad.exe", "wordpad.exe"], "macos": ["TextEdit"] },
+        { "name": "Notepad++", "windows": ["notepad++.exe"] },
+        { "name": "Pages", "macos": ["Pages"] },
+        { "name": "Scribus", "windows": ["Scribus.exe"], "macos": ["Scribus"], "linux": ["scribus"] }
+      ]
+    },
+    {
+      "name": "Lectores de PDF",
+      "programs": [
+        { "name": "Acrobat", "windows": ["AcroRd32.exe", "Acrobat.exe"], "macos": ["Acrobat Reader", "Acrobat Pro DC", "Adobe Acrobat Reader DC", "Adobe Reader", "Adobe Acrobat", "Acrobat Pro", "Acrobat"] },
+        { "name": "Anteprima", "macos": ["Anteprima"] },
+        { "name": "Evince", "linux": ["evince"] },
+        { "name": "Foxit PhantomPDF", "windows": ["FoxitPhantomPDF.exe"] },
+        { "name": "Foxit Reader", "windows": ["FoxitReader.exe", "Foxit Reader.exe", "FoxitPDFReader.exe"], "macos": ["Foxit Reader"], "linux": ["FoxitReader"] },
+        { "name": "Nitro PDF", "windows": ["NitroPDF.exe"] },
+        { "name": "Okular", "windows": ["okular.exe"], "linux": ["okular"] },
+        { "name": "PDF Expert", "macos": ["PDF Expert"] },
+        { "name": "PDF Plus", "windows": ["PDFPlus.exe"] },
+        { "name": "PDF Reader Pro Lite", "macos": ["PDF Reader Pro Lite"] },
+        { "name": "PDF Vista", "windows": ["pdfvista.exe"] },
+        { "name": "PDF-XChange Editor", "windows": ["PDFXEdit.exe"] },
+        { "name": "PDF-XChange Viewer", "windows": ["PDFXCview.exe"] },
+        { "name": "Sumatra PDF", "windows": ["SumatraPDF.exe"] },
+        { "name": "Wondershare PDFelement", "windows": ["PDFelement.exe"], "macos": ["Wondershare PDFelement"] }
+      ]
+    },
+    {
+      "name": "Hojas de cálculo",
+      "programs": [
+        { "name": "Microsoft Excel", "windows": ["EXCEL.EXE"], "macos": ["Microsoft Excel"] },
+        { "name": "Numbers", "macos": ["Numbers"] },
+        { "name": "JASP", "windows": ["jasp.exe"], "macos": ["jasp"], "linux": ["jasp"] }
+      ]
+    },
+    {
+      "name": "Clientes de correo",
+      "programs": [
+        { "name": "Airmail", "macos": ["Airmail"] },
+        { "name": "Mail", "windows": ["MailClient.exe"], "macos": ["Mail"] },
+        { "name": "Microsoft Outlook", "windows": ["OUTLOOK.EXE"], "macos": ["Microsoft Outlook"] },
+        { "name": "Thunderbird", "windows": ["thunderbird.exe"], "macos": ["Thunderbird"], "linux": ["thunderbird"] }
+      ]
+    },
+    {
+      "name": "Navegadores web",
+      "programs": [
+        { "name": "Avast Secure Browser", "windows": ["AvastBrowser.exe", "AvastUI.exe"], "macos": ["Avast Secure Browser"] },
+        { "name": "AVG Secure Browser", "windows": ["AVGBrowser.exe"], "macos": ["AVGBrowser", "AVG Secure Browser"] },
+        { "name": "Brave Browser", "windows": ["brave.exe"], "macos": ["Brave Browser"], "linux": ["brave"] },
+        { "name": "Browser", "windows": ["browser.exe"] },
+        { "name": "CCleaner Browser", "windows": ["CCleanerBrowser.exe"] },
+        { "name": "Comodo Dragon Browser", "windows": ["dragon.exe"] },
+        { "name": "Comodo IceDragon Browser", "windows": ["icedragon.exe"] },
+        { "name": "Google Chrome", "windows": ["chrome.exe"], "macos": ["Google Chrome", "Google Chrome.app", "Google Chrome 2"], "linux": ["chrome"] },
+        { "name": "Internet Explorer", "windows": ["iexplore.exe"] },
+        { "name": "Maxthon Browser", "windows": ["Maxthon.exe"] },
+        { "name": "Microsoft Edge", "windows": ["MicrosoftEdge.exe", "MicrosoftEdgeCP.exe", "msedge.exe"], "macos": ["Microsoft Edge"] },
+        { "name": "Mozilla Firefox", "windows": ["firefox.exe"], "macos": ["Firefox", "Firefox 2"], "linux": ["firefox-esr", "firefox"] },
+        { "name": "Opera", "windows": ["opera.exe"], "macos": ["Opera"], "linux": ["opera"] },
+        { "name": "Safari", "windows": ["Safari.exe"], "macos": ["Safari", "Safari.app"] },
+        { "name": "Safe Exam Browser", "windows": ["SafeExamBrowser.Client.exe"] },
+        { "name": "SeaMonkey Browser", "windows": ["seamonkey.exe"] },
+        { "name": "Torch Browser", "windows": ["torch.exe"] },
+        { "name": "Vivaldi Browser", "windows": ["vivaldi.exe"], "macos": ["Vivaldi"], "linux": ["vivaldi-bin"] },
+        { "name": "Comet", "windows": ["comet.exe"], "macos": ["Comet"] }
+      ]
+    },
+    {
+      "name": "Herramientas de conversación",
+      "programs": [
+        { "name": "Adobe Connect", "windows": ["connect.exe"], "macos": ["Adobe Connect"] },
+        { "name": "Discord", "windows": ["Discord.exe"], "macos": ["Discord"], "linux": ["Discord"] },
+        { "name": "Messenger", "windows": ["messenger.exe"] },
+        { "name": "Microsoft Lync", "windows": ["lync.exe"], "macos": ["Microsoft Lync"] },
+        { "name": "Microsoft Teams", "windows": ["Teams.exe"], "macos": ["Microsoft Teams"], "linux": ["teams"] },
+        { "name": "Skype", "windows": ["Skype.exe"], "macos": ["Skype"], "linux": ["skypeforlinux"] },
+        { "name": "Slack", "windows": ["slack.exe"], "macos": ["Slack"], "linux": ["slack"] },
+        { "name": "Telegram", "windows": ["Telegram.exe"], "macos": ["Telegram"], "linux": ["telegram-deskto"] },
+        { "name": "WhatsApp", "windows": ["WhatsApp.exe", "whatsapp.exe"], "macos": ["WhatsApp"] },
+        { "name": "Zoiper5", "windows": ["Zoiper5.exe"], "macos": ["Zoiper5"], "linux": ["zoiper"] },
+        { "name": "Zoom", "windows": ["Zoom.exe"], "macos": ["zoom.us"], "linux": ["zoom"] }
+      ]
+    },
+    {
+      "name": "Cámaras virtuales",
+      "programs": [
+        { "name": "AlterCam", "windows": ["AlterCam.exe"] },
+        { "name": "Camera Helper Shell", "windows": ["CameraHelperShell.exe"] },
+        { "name": "CamMask", "windows": ["CamMask.exe"] },
+        { "name": "CamTwist", "macos": ["CamTwist"] },
+        { "name": "Droid Cam", "windows": ["DroidCamApp.exe"] },
+        { "name": "Fake Webcam", "windows": ["FakeWebcam.exe"] },
+        { "name": "LiveCam", "windows": ["LiveCam.exe"] },
+        { "name": "Magic Camera", "windows": ["MagicCamera.exe"] },
+        { "name": "ManyCam", "windows": ["ManyCam.exe"], "macos": ["ManyCam"] },
+        { "name": "Morecam", "windows": ["Morecam.exe"] },
+        { "name": "OBS", "windows": ["obs64.exe"], "macos": ["OBS"], "linux": ["obs"] },
+        { "name": "Snap Camera", "windows": ["Snap Camera.exe"], "macos": ["Snap Camera"] },
+        { "name": "SparkoCam", "windows": ["SparkoCam.exe"] },
+        { "name": "SplitCam", "windows": ["splitcam.exe"], "macos": ["SplitCam"] },
+        { "name": "VCam", "windows": ["VCamMain.exe"] },
+        { "name": "WebcamMax", "windows": ["WebcamMax.exe"] },
+        { "name": "Webcamoid", "windows": ["webcamoid.exe"], "macos": ["webcamoid"], "linux": ["webcamoid"] },
+        { "name": "XSplitVCam", "windows": ["XSplitVCam.exe", "XSplit.Core.exe"] },
+        { "name": "YouCam", "windows": ["Youcam6_webcam_camera_video.exe", "YouCam8.exe", "YouCam9.exe", "YouCam.exe"] }
+      ]
+    },
+    {
+      "name": "Exploradores de archivos",
+      "programs": [
+        { "name": "Clover Windows Explorer", "windows": ["Clover.exe"] },
+        { "name": "Dolphin", "linux": ["dolphin"] },
+        { "name": "Explorador de Archivos", "windows": ["explorer.exe"] },
+        { "name": "Finder", "macos": ["Finder"] },
+        { "name": "Folder Size Explorer", "windows": ["FolderSize.exe"] },
+        { "name": "Nautilus", "linux": ["nautilus"] },
+        { "name": "Preview", "macos": ["Preview"] },
+        { "name": "Vista Previa", "macos": ["Vista Previa"] }
+      ]
+    },
+    {
+      "name": "Reproductores multimedia",
+      "programs": [
+        { "name": "AIMP", "windows": ["AIMP.exe"] },
+        { "name": "Audacity", "windows": ["Audacity.exe"], "macos": ["Audacity"], "linux": ["audacity"] },
+        { "name": "iMusic", "macos": ["Música"] },
+        { "name": "iTunes", "windows": ["iTunes.exe"], "macos": ["iTunes"] },
+        { "name": "Reproductor de Windows Media", "windows": ["wmplayer.exe"] },
+        { "name": "Rhythmbox", "linux": ["rhythmbox"] },
+        { "name": "Spotify", "windows": ["Spotify.exe"], "macos": ["Spotify"], "linux": ["spotify"] },
+        { "name": "VLC", "windows": ["vlc.exe"], "macos": ["VLC"], "linux": ["vlc"] }
+      ]
+    },
+    {
+      "name": "Diapositivas",
+      "programs": [
+        { "name": "Keynote", "macos": ["Keynote"] },
+        { "name": "Microsoft PowerPoint", "windows": ["POWERPNT.EXE"], "macos": ["Microsoft PowerPoint"] }
+      ]
+    },
+    {
+      "name": "Screenshots / Screen Recorder",
+      "programs": [
+        { "name": "Action! Screen Recorder", "windows": ["Action.exe"] },
+        { "name": "Apowersoft Screen Recorder", "windows": ["Apowersoft Screen Recorder Pro 2.exe", "ApowerREC.exe"], "macos": ["Apowersoft Mac Screen Recorder"] },
+        { "name": "Bandicam", "windows": ["bdcam.exe"] },
+        { "name": "CamStudio", "windows": ["Recorder.exe"] },
+        { "name": "Camtasia", "windows": ["CamtasiaStudio.exe"], "macos": ["Camtasia 2020"] },
+        { "name": "Captura de Imagen", "macos": ["Captura de Imagen"] },
+        { "name": "Ezvid Screen Recorder", "windows": ["ezvid.exe"] },
+        { "name": "FonePaw Screen Recorder", "windows": ["FonePaw Screen Recorder.exe"] },
+        { "name": "Greenshot", "windows": ["Greenshot.exe"] },
+        { "name": "Gyazowin", "windows": ["Gyazowin.exe"] },
+        { "name": "GyStation", "windows": ["GyStation.exe"] },
+        { "name": "Icecream Screen Recorder", "windows": ["recorder.exe"] },
+        { "name": "LightShot", "windows": ["Lightshot.exe"], "macos": ["Lightshot Screenshot"] },
+        { "name": "Linux ScreenShot", "linux": ["gnome-screensho", "spectacle"] },
+        { "name": "Loom", "windows": ["Loom.exe"], "macos": ["Loom"] },
+        { "name": "Monosnap Screen Recorder", "windows": ["Monosnap.exe"], "macos": ["Monosnap"] },
+        { "name": "Movavi Screen Recorder", "windows": ["ScreenRecorder.exe"], "macos": ["Movavi Screen Recorder 21"] },
+        { "name": "OBS", "windows": ["obs64.exe"], "macos": ["OBS"], "linux": ["obs"] },
+        { "name": "Photo Booth", "macos": ["Photo Booth"] },
+        { "name": "PicPick", "windows": ["picpick.exe"] },
+        { "name": "QuickTime Player", "macos": ["QuickTime Player"] },
+        { "name": "Recortes", "windows": ["SnippingTool.exe"] },
+        { "name": "Screen Saver Engine", "macos": ["ScreenSaverEngine"] },
+        { "name": "Screencast-O-Matic", "windows": ["Screencast-O-Matic.exe"], "macos": ["Screencast-O-Matic"] },
+        { "name": "Screenpresso", "windows": ["Screenpresso.exe"] },
+        { "name": "ShareX", "windows": ["ShareX.exe"] },
+        { "name": "Snagit", "windows": ["SnagitEditor.exe", "Snagit32.exe"], "macos": ["Snagit 2021", "Snagit 2020"] },
+        { "name": "TinyTake", "windows": ["TinyTake by MangoApps.exe"], "macos": ["TinyTake"] },
+        { "name": "Wondershare Filmora", "windows": ["Wondershare Filmora X.exe"], "macos": ["Wondershare Filmora9"] }
+      ]
+    },
+    {
+      "name": "Control remoto",
+      "programs": [
+        { "name": "AnyDesk", "windows": ["AnyDesk.exe", "AnyDesk (1).exe"], "macos": ["AnyDesk"], "linux": ["anydesk"] },
+        { "name": "Barrier", "windows": ["barriers.exe", "barrierd.exe"], "macos": ["Barrier"], "linux": ["barrier", "barrierc", "barriers"] },
+        { "name": "macOS Screen Sharing", "macos": ["ScreensharingAgent"] },
+        { "name": "Supremo Remote Control", "windows": ["Supremo.exe"], "macos": ["Supremo"] },
+        { "name": "Synergy", "macos": ["Synergy"] },
+        { "name": "TeamViewer", "windows": ["TeamViewer.exe"], "macos": ["TeamViewer"], "linux": ["TeamViewer", "teamviewerd"] },
+        { "name": "Parsec", "windows": ["parsecd.exe"], "macos": ["parsecd"], "linux": ["parsecd"] }
+      ]
+    },
+    {
+      "name": "Pentesting",
+      "programs": [
+        { "name": "Burp Suite", "windows": ["BurpSuiteCommunity.exe"], "macos": ["Burp Suite Community Edition", "Burp Suite Professional"] },
+        { "name": "OWASP ZAP", "macos": ["ZAP"] }
+      ]
+    },
+    {
+      "name": "Editores de código",
+      "programs": [
+        { "name": "Android Studio", "windows": ["studio64.exe"] },
+        { "name": "Atom", "windows": ["atom.exe"], "linux": ["atom"] },
+        { "name": "Eclipse IDE", "windows": ["eclipse.exe"], "macos": ["Eclipse"], "linux": ["eclipse"] },
+        { "name": "MATLAB", "windows": ["matlab.exe", "MATLABWindow.exe"], "macos": ["MATLAB"] },
+        { "name": "NetBeans", "windows": ["netbeans64.exe"], "macos": ["NetBeans"] },
+        { "name": "PSeInt", "windows": ["wxPSeInt.exe", "psterm.exe"], "macos": ["PSeInt"], "linux": ["pseint"] },
+        { "name": "PyCharm", "windows": ["pycharm64.exe"], "macos": ["PyCharm"] },
+        { "name": "python", "windows": ["pythonw.exe", "python.exe"], "macos": ["python"] },
+        { "name": "RStudio", "windows": ["rstudio.exe"], "macos": ["RStudio"], "linux": ["rstudio"] },
+        { "name": "Sublime Text", "windows": ["sublime_text.exe"], "macos": ["Sublime Text"], "linux": ["sublime_text"] },
+        { "name": "Visual Studio", "windows": ["VsDebugConsole.exe", "devenv.exe"], "macos": ["Visual Studio"] },
+        { "name": "Visual Studio Code", "windows": ["Code.exe", "code.exe"], "macos": ["Code", "Visual Studio Code"], "linux": ["code"] },
+        { "name": "WebStorm", "windows": ["webstorm64.exe"], "macos": ["WebStorm"] }
+      ]
+    },
+    {
+      "name": "Máquinas virtuales",
+      "programs": [
+        { "name": "Parallels", "macos": ["Parallels"] },
+        { "name": "VirtualBox", "windows": ["VirtualBox.exe", "VirtualBoxVM.exe"], "macos": ["VirtualBox"], "linux": ["VirtualBox"] },
+        { "name": "VMware", "windows": ["vmware.exe", "vmplayer.exe"], "macos": ["VMware Fusion"], "linux": ["vmplayer"] }
+      ]
+    },
+    {
+      "name": "Clientes de bases de datos",
+      "programs": [
+        { "name": "Microsoft Access", "windows": ["MSACCESS.EXE"] },
+        { "name": "DataGrip", "windows": ["datagrip64.exe"], "macos": ["DataGrip"], "linux": ["datagrip.sh"] },
+        { "name": "HeidiSQL", "windows": ["heidisql.exe"] },
+        { "name": "MongoDB Compass", "windows": ["MongoDBCompass.exe"] },
+        { "name": "MySQLWorkbench", "windows": ["MySQLWorkbench.exe"], "macos": ["MySQLWorkbench"], "linux": ["mysql-workbench-bin"] },
+        { "name": "Oracle SQL Developer", "windows": ["sqldeveloper64W.exe"], "macos": ["Oracle SQL Developer"] },
+        { "name": "SQL Server Management Studio", "windows": ["Ssms.exe"] },
+        { "name": "TablePlus", "windows": ["TablePlus.exe"], "macos": ["TablePlus"], "linux": ["tableplus.sh", "tableplus"] }
+      ]
+    },
+    {
+      "name": "Ofimática Open Source",
+      "programs": [
+        { "name": "LibreOffice", "macos": ["LibreOffice"] },
+        { "name": "Ofimática Open Source", "linux": ["soffice.bin", "soffice"] },
+        { "name": "OpenOffice", "windows": ["soffice.bin", "soffice.exe"], "macos": ["OpenOffice"] },
+        { "name": "WPS Office", "windows": ["wps.exe"], "linux": ["wps", "wpsoffice"] }
+      ]
+    }
+  ]
+}

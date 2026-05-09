@@ -2,6 +2,53 @@
 
 Registro de cambios de VM Spoofer. Cada versión incluye las funcionalidades añadidas, correcciones y mejoras realizadas.
 
+## v1.1.2 (10 de mayo de 2026)
+
+### Seguridad operativa
+
+- VRDE/RDP de VirtualBox queda desactivado por defecto en Linux y macOS.
+- Si se habilita VRDE desde el asistente, solo escucha en `127.0.0.1` y en el puerto elegido.
+- El post-install de Linux ya no instala ni activa SSH automáticamente.
+- El post-install de `OK VM Proctoring` ya no bloquea módulos de Guest Additions.
+- Los USB externos no se preseleccionan automáticamente; audio y micrófono usan audio-in/audio-out.
+- Los filtros USB creados por la herramienta quedan prefijados para poder limpiarlos durante restauración.
+
+### Robustez
+
+- Linux detecta correctamente firmware EFI/BIOS antes de escribir DMI/SMBIOS.
+- Backups con JSON generado mediante APIs estructuradas (`jq`/`ConvertTo-Json`) y copia `.vbox` cuando está disponible.
+- Restauración ampliada para recursos, red, gráficos, paravirtualización, VRDE y extradata.
+- Backup/restauración cubre audio, entrada/salida de audio, portapapeles, drag-and-drop y USB xHCI.
+- Validación de MAC manual con o sin separadores.
+- Errores críticos de `VBoxManage` dejan de ocultarse durante aplicación de cambios.
+- Reemplazos `sed` del post-install Linux escapan `/`, `\` y `&`.
+
+### Verificación y mantenimiento
+
+- Añadido `launcher.js` con menu guiado para preparar/restaurar VMs, verificar, auditar, validar hooks y generar informes.
+- El launcher prioriza el perfil `OK VM Proctoring` y separa las herramientas fuera de alcance proctoring para no mezclar aceptación con diagnóstico avanzado.
+- Añadida opción de launcher para conectar webcam por passthrough de VirtualBox en una VM arrancada.
+- Añadidos launchers `start.sh`, `start.command` y `start.ps1` para reducir el uso manual de comandos.
+- Añadido `guest-cleanup-linux.sh` para limpieza estricta de artefactos guest en Linux.
+- Añadida opción de launcher para modo estricto/headless (`graphicscontroller none`) en cualquier VM apagada.
+- Añadido `check.js` para verificación con `systeminformation` y modo avanzado por SO (`--advanced`).
+- `check.js` replica por defecto las llamadas observadas del cliente: `system`, `diskLayout`, `processes`, `osInfo`, `mem` y `cpu`.
+- `check.js` permite validar la lista exacta `bannedPrograms` con `--banned-programs <file>`.
+- `check.js` acepta catálogos locales estructurados por plataforma con `--banned-platform`.
+- Añadido `banned-programs.json` con el catálogo estructurado de programas bloqueados por plataforma.
+- Añadido `app-policy.json` para declarar el modelo denylist: lo listado bloquea, lo no listado queda permitido salvo regla externa.
+- Añadido `process-watch.js` para validar dinámicamente `systeminformation.processes()` mientras se abre software dentro de la VM.
+- Añadido `BANNED_PROGRAMS.md` con alcance de la detección nominal por procesos.
+- Añadido `input-hook-check.js` para validar de forma consentida `uiohook-napi` y `keyspy@1.1.1`.
+- Añadido `validation-runner.js` para generar bundles de validación por VM/SO.
+- `validation-runner.js` y `process-watch.js` ocultan rutas locales y hostname por defecto; `--include-local-details` conserva esos datos solo si se piden expresamente.
+- Añadido `OK_VM_PROCTORING.md` con alcance exacto de `OK VM Proctoring`.
+- Añadido workflow CI para sintaxis Bash, JSON, Node y PowerShell.
+- Añadidos `SECURITY.md` y licencia propietaria.
+- `.gitignore` ampliado para excluir logs, backups, bundles de validación, imágenes/discos de VM, exports y secretos locales.
+
+---
+
 ## v0.2.0 (28 de marzo de 2026)
 
 ### Soporte para macOS

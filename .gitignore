@@ -3,3 +3,43 @@ backups/
 node_modules/
 post-install-linux.sh
 post-install-windows.txt
+*.log
+validation-runs/
+
+# Local OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# Local secrets/configuration
+.env
+.env.*
+!.env.example
+
+# Package manager and test output
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+dist/
+build/
+
+# VirtualBox/VM artifacts and exports
+*.vbox
+*.vbox-prev
+*.vbox-tmp
+*.vdi
+*.vmdk
+*.vhd
+*.vhdx
+*.raw
+*.qcow2
+*.iso
+*.viso
+*.ova
+*.ovf
+*.sav
+*.webm

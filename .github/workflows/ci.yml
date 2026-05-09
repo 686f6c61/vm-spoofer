@@ -1,0 +1,85 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq shellcheck
+
+      - name: Validate Bash syntax
+        run: |
+          bash -n start.sh
+          bash -n start.command
+          bash -n guest-cleanup-linux.sh
+          bash -n vm-spoofer.sh
+          bash -n vm-spoofer-mac.sh
+
+      - name: Run shellcheck
+        run: shellcheck start.sh start.command guest-cleanup-linux.sh vm-spoofer.sh vm-spoofer-mac.sh
+
+      - name: Validate JSON database
+        run: |
+          jq empty app-policy.json
+          jq empty banned-programs.json
+          jq empty hardware-db.json
+          jq -e '
+            (.mode == "denylist") and
+            (.defaultDecision == "allowed") and
+            (.listedProgramDecision == "blocked") and
+            (.categories | length == 17) and
+            ([.categories[].programs[]] | length == 165) and
+            ([.categories[].programs[] | (.windows // []) | length] | add == 160) and
+            ([.categories[].programs[] | (.macos // []) | length] | add == 116) and
+            ([.categories[].programs[] | (.linux // []) | length] | add == 56) and
+            ([.categories[].programs[] | ((.windows // []) + (.macos // []) + (.linux // [])) | length] | add == 332)
+          ' banned-programs.json
+          jq -e '
+            has("manufacturers") and
+            has("cpus") and
+            has("disks") and
+            has("gpus") and
+            has("nics") and
+            has("lspci_templates") and
+            (.manufacturers | all(.[]; has("label") and has("system") and has("bios") and has("board") and has("chassis") and has("acpi"))) and
+            (.cpus | all(.[]; has("label") and has("brand") and has("cores"))) and
+            (.disks | all(.[]; has("label") and has("model") and has("serial_prefix") and has("firmware"))) and
+            (.gpus | all(.[]; has("label") and has("pci_name"))) and
+            (.nics | all(.[]; has("label") and has("mac_prefix") and has("pci_name"))) and
+            (.lspci_templates | all(.[]; has("host_bridge") and has("isa_bridge") and has("ide") and has("guest_service") and has("acpi_bridge") and has("audio")))
+          ' hardware-db.json
+
+      - name: Validate Node.js scripts syntax
+        run: |
+          node --check banned-programs.js
+          node --check check.js
+          node --check input-hook-check.js
+          node --check launcher.js
+          node --check process-watch.js
+          node --check validation-runner.js
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          foreach ($file in @("vm-spoofer.ps1", "start.ps1")) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $file,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Error
+              exit 1
+            }
+          }

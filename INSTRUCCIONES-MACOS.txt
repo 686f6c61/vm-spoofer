@@ -24,10 +24,13 @@ REQUISITOS
     millones de desarrolladores.
     Instalar desde https://brew.sh
   - Una VM ya creada en VirtualBox (Windows o Linux)
-  - Los archivos: vm-spoofer-mac.sh, hardware-db.json
+  - Node.js: necesario para el menu principal, verificadores
+    y generacion de informes.
+  - Los archivos: start.command, launcher.js,
+    vm-spoofer-mac.sh, hardware-db.json
 
   Instalar dependencias con Homebrew:
-    brew install dialog jq
+    brew install dialog jq node
 
   Qué es cada dependencia:
     - dialog: programa que muestra menús gráficos dentro
@@ -38,6 +41,8 @@ REQUISITOS
       terminal. El script lo necesita para leer la base
       de datos de hardware (hardware-db.json) y extraer
       los perfiles de fabricante, CPU, disco, etc.
+    - node: ejecuta el menu principal, los verificadores
+      y el generador de informes.
 
   Si no tienes Homebrew:
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -54,15 +59,26 @@ CÓMO USAR
    cd ruta/a/vm-creator
 
 3. Dar permisos de ejecución (solo la primera vez)
-   chmod +x vm-spoofer-mac.sh
+   chmod +x start.command vm-spoofer-mac.sh
 
-4. Ejecutar
-   ./vm-spoofer-mac.sh
+4. Ejecutar el menu principal
+   ./start.command
 
-   O si prefieres sin dar permisos:
+   Desde ese menu puedes:
+     [1] Elegir sistema aparente y preparar VM
+     [2] Verificar systeminformation
+     [3] Validar software abierto contra bannedPrograms
+     [4] Validar hooks de teclado/raton
+     [5] Generar informe OK VM Proctoring
+     [6] Conectar webcam a una VM arrancada
+     [7] Fuera de alcance proctoring: diagnostico avanzado
+     [8] Fuera de alcance proctoring: herramientas estrictas
+     [9] Ver rutas de documentacion
+
+   Si quieres abrir directamente el asistente tecnico:
    bash vm-spoofer-mac.sh
 
-4. Seguir el asistente (8 pasos)
+5. Seguir el asistente (8 pasos)
 
    El script detecta si tu Mac es Intel o Apple Silicon
    y lo muestra en cada pantalla.
@@ -97,16 +113,23 @@ CÓMO USAR
             - Random: regenera otra con el mismo prefijo
 
    [6/8] Chipset PCI
-         Cambia TODOS los dispositivos PCI de la VM:
+         Plantilla de referencia para coherencia del perfil.
+         En macOS host no se genera post-install de lspci:
          Intel 12th-14th Gen, Meteor Lake, Arrow Lake,
          AMD Zen4/Zen5, Apple Intel, Apple Silicon.
 
-   [7/8] Dispositivos USB
-         Detecta cámaras, micrófonos y altavoces del Mac.
+   [7/8] Periféricos
+         Audio y micro se activan con VirtualBox audio-in/audio-out.
+         USB externo queda como opción manual para webcam o dispositivo concreto.
          Los que selecciones se conectan cada vez que
          arranca la VM.
 
-   [8/8] Confirmar y aplicar
+   [8/8] Red y acceso remoto
+         Elige NAT, puente o mantener la red actual.
+         VRDE/RDP queda desactivado por defecto. Si lo activas,
+         solo escucha en 127.0.0.1 y en el puerto elegido.
+
+   [Resumen] Confirmar y aplicar
          Muestra resumen completo. Confirmar para aplicar.
 
 5. Arrancar la VM
@@ -136,13 +159,51 @@ CÓMO USAR
         brew install node
 
    b) Copiar check.js dentro de la VM y ejecutar:
-      npm install systeminformation
+      npm install systeminformation@5.31.6
       node check.js
 
+      Fuera de alcance proctoring, para diagnostico avanzado:
+        node check.js --advanced
+
+      El modo avanzado revisa system_profiler, ioreg,
+      kext/kmutil, launchd, pkg receipts, sysctl y
+      artefactos de Guest Additions.
+      Si tienes bannedPrograms, usa:
+        node check.js --banned-programs banned-programs.txt
+
+      Para validar abrir software dentro de la VM:
+        node process-watch.js --banned-programs banned-programs.txt --duration 60 --interval 2
+
    c) Resultado esperado:
-      - system.virtual:      false
-      - system.virtualHost:  vacío
-      - Fabricante:           (el que elegiste)
+      - [FINDINGS] sin indicadores comunes de VM
+      - Score: 0/100 en modo común
+      - Fabricante: (el que elegiste)
+
+      Si aparecen findings de VirtualBox/Oracle/VMware/QEMU/KVM,
+      algo falló o queda riesgo residual de la plataforma invitada.
+
+      Si el detector usa hooks de teclado/ratón:
+        npm install uiohook-napi@1.5.5
+        node input-hook-check.js --provider uiohook-napi --duration 15
+
+      O para keyspy:
+        npm install keyspy@1.1.1
+        node input-hook-check.js --provider keyspy --duration 15
+
+      En macOS hay que conceder permisos de Accesibilidad.
+      Ejecutar solo con consentimiento; no guarda teclas ni texto.
+
+      Generar bundle de validación:
+        node validation-runner.js --out validation-runs/macos-vm
+
+      Con bannedPrograms y watch dinamico:
+        node validation-runner.js --out validation-runs/macos-vm \
+          --banned-programs banned-programs.txt \
+          --run-process-watch --process-watch-duration 60
+
+      Con hooks:
+        node validation-runner.js --out validation-runs/macos-vm \
+          --run-input-hooks --hook-provider keyspy --hook-duration 15 --yes
 
    OPCIÓN B: Sin Node.js
    ~~~~~~~~~~~~~~~~~~~~~~
@@ -198,6 +259,7 @@ R: Sí. El script guarda un backup automático antes de
    aplicar cambios. Ejecuta el script de nuevo y elige
    "Restaurar una VM" para volver a la configuración
    original. Los backups se guardan en la carpeta backups/.
+   También se guarda una copia .vbox cuando VirtualBox la expone.
 
 P: Funciona en Mac Intel y Apple Silicon?
 R: Sí. El script detecta automáticamente la arquitectura
